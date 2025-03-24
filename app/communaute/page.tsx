@@ -22,7 +22,7 @@ export default function Home() {
 		{ id: 1, text: 'Rejoignez-nous pour notre réunion communautaire demain à 18h!' },
 	  ]
 	  const room =[
-		{ id: 1, image: 'next.svg', text: 'Événement spécial ce week-end !' },
+		{ id: 1, image: 'https://heroui.com/images/hero-card-complete.jpeg', text: 'Room 1' },
 	  ]
 	return (
 		<div className="">
