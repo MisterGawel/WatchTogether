@@ -1,3 +1,5 @@
+"use client";
+
 const DailyMotionPlayer = ({ videoId }) => (
     <iframe
         src={`https://geo.dailymotion.com/player.html?video=${videoId}`}
