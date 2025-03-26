@@ -80,7 +80,7 @@ export default function CommunitySpace({ Message, Annonce ,Room}) {
                   placeholder="Écrire une annonce..."
                   className="w-full mt-2"
                 />
-                <Button onClick={addAnnonce} className="mt-2 w-full">
+                <Button onPress={addAnnonce} className="mt-2 w-full">
                   Ajouter l'annonce
                 </Button>
               </Card>
