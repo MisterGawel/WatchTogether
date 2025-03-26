@@ -2,11 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Définition des variables CSS */
 :root {
-	--background: #ffffff;
-	--foreground: #171717;
+	--border: 180 200 255;
+	--input: 220 235 255;
+	--ring: 100 140 255;
+	--background: #e6f0ff; /* Bleu très clair */
+	--foreground: #0a1f44; /* Bleu foncé */
+	--primary: 30 100 250; /* Bleu intense */
+	--primary-foreground: 255 255 255;
+	--secondary: 150 200 255; /* Bleu pastel */
+	--secondary-foreground: 0 0 0;
+	--destructive: 220 38 38;
+	--destructive-foreground: 255 255 255;
+	--muted: 200 220 255;
+	--muted-foreground: 50 70 120;
+	--accent: 100 180 255; /* Bleu clair */
+	--accent-foreground: 255 255 255;
+	--popover: 240 245 255;
+	--popover-foreground: 0 0 0;
+	--card: 230 240 255;
+	--card-foreground: 0 0 0;
+	--radius: 0.5rem;
 }
 
+/* Support du mode sombre */
+@media (prefers-color-scheme: dark) {
+	:root {
+		--border: 50 50 50;
+		--input: 80 80 80;
+		--ring: 100 100 100;
+		--background: #0a0a0a;
+		--foreground: #ededed;
+		--primary: 10 132 255;
+		--primary-foreground: 255 255 255;
+		--secondary: 255 159 10;
+		--secondary-foreground: 0 0 0;
+		--destructive: 255 69 69;
+		--destructive-foreground: 255 255 255;
+		--muted: 55 65 81;
+		--muted-foreground: 156 163 175;
+		--accent: 5 150 105;
+		--accent-foreground: 255 255 255;
+		--popover: 30 30 30;
+		--popover-foreground: 255 255 255;
+		--card: 15 15 15;
+		--card-foreground: 255 255 255;
+	}
+}
+
+body {
+	background: hsl(var(--background));
+	color: hsl(var(--foreground));
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Ajout des styles spécifiques à Heroui */
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
@@ -14,15 +65,29 @@
 	--font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		--background: #0a0a0a;
-		--foreground: #ededed;
+/* Animation pour les accordéons */
+@keyframes accordion-down {
+	from {
+		height: 0;
+	}
+	to {
+		height: var(--radix-accordion-content-height);
 	}
 }
 
-body {
-	background: var(--background);
-	color: var(--foreground);
-	font-family: Arial, Helvetica, sans-serif;
+@keyframes accordion-up {
+	from {
+		height: var(--radix-accordion-content-height);
+	}
+	to {
+		height: 0;
+	}
+}
+
+.accordion-down {
+	animation: accordion-down 0.2s ease-out;
+}
+
+.accordion-up {
+	animation: accordion-up 0.2s ease-out;
 }
