@@ -37,7 +37,7 @@
 		"**/*.tsx",
 		".next/types/**/*.ts",
 		"firebase.js"
-	],
+, "app/players/youtube-player.jsx"	],
 	"exclude": [
 		"node_modules"
 	]
