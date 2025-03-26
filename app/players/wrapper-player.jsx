@@ -10,7 +10,6 @@ const WrapperPlayer = ({ Player }) => {
             <input
                 type='text'
                 placeholder='Enter video id'
-                className='absolute top-0 left-0 w-full h-12 px-4'
                 value={videoId}
                 onChange={(e) => setVideoId(e.target.value)}
             />
