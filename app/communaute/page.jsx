@@ -1,8 +1,12 @@
-import Image from 'next/image';
+'use client'
+import { useEffect } from "react";
 import { Button, ButtonGroup } from "@heroui/button";
 import ChatCommu from './chat';
 import CommunitySpace from './EspaceCommu'
+import { db,auth} from '@/firebase';
+import { getDocs,collection } from 'firebase/firestore';
 export default function Home() {
+
 	//Base temporaire
 	  const message = [
 		{ id: 1, text: "Bienvenue sur le chat!", user: "System" },
@@ -24,7 +28,10 @@ export default function Home() {
 	  const room =[
 		{ id: 1, image: 'https://heroui.com/images/hero-card-complete.jpeg', text: 'Room 1' },
 	  ]
+
+
 	return (
+		
 		<div className="">
 			<main className="">
 				<CommunitySpace Message={message} Annonce = {annonce} Room={room} ></CommunitySpace>
