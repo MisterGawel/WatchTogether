@@ -49,7 +49,7 @@ export default function RegisterPage() {
 	return (
 		<>
 			<div className="flex flex-col items-center justify-center w-full h-full">
-				<h1 className="mb-16 text-4xl font-bold text-blue-700">
+				<h1 className="mb-16 text-3xl font-bold text-foreground">
 					Inscription
 				</h1>
 				<Form
@@ -134,7 +134,7 @@ export default function RegisterPage() {
 					>
 						Se connecter
 					</Button>
-					<div className="flex justify-center w-full mt-16">
+					<div className="flex justify-center w-full mt-4">
 						<Link
 							href="/auth/login"
 							className="mt-4 text-sm text-gray-700 w-fit"

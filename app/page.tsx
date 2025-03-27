@@ -24,7 +24,7 @@ export default function Home() {
 	};
 
 	return (
-		<div className="flex flex-col min-h-screen">
+		<div className="flex flex-col min-h-screen bg-background">
 			{/* Navbar */}
 			<header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
 				<div className="container flex items-center justify-between h-16">
