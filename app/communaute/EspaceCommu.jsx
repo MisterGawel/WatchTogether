@@ -10,13 +10,6 @@ import CardRoom from './CardRoom'
 import CardAnnonce from './CardAnnonces'
 import InputAnnonce from './inputAnnonce'
 import InputRoom from './InputRoom';
-/* structure de données d'espace communautaire 
-    -ensemble de message avec un user associée (chat)
-    -ensemble d'annonce 
-    -ensemble de Salle vidéo (Card) avec une image ou preview de la vidéo
-    -ensemble d'utilisateur de la commu (avec des admin et des users) 
-*/
-
 export default function CommunitySpace({ Message, Annonce ,Room}) {
   const CommuID = 'VmcNk4sdbnp5Y1NoSeH5'
   const [rooms, setRoom] = useState([]);
@@ -38,22 +31,17 @@ export default function CommunitySpace({ Message, Annonce ,Room}) {
         await setDoc(doc(db, "rooms", newRoomId), newRoom);
         const communityRef = doc(db, "communities", CommuID);
         const communityDocSnapshot = await getDoc(communityRef);
-        
         if (communityDocSnapshot.exists()) {
           const currentRooms = communityDocSnapshot.data().rooms || [];
           const updatedRooms = [...currentRooms, newRoomId];
-  
           // Mise à jour Firestore
           await updateDoc(communityRef, { rooms: updatedRooms });
-  
           // Mettre à jour l'état local
           setRoom((prevRooms) => [...prevRooms, { id: newRoomId, name: newRoomName, member: {} }]);
-  
           console.log("Salle ajoutée avec succès !");
         } else {
           console.log("Le document de la communauté n'existe pas !");
         }
-  
         // Réinitialiser les champs
         setNewRoomName('');
       } catch (error) {
@@ -66,21 +54,14 @@ export default function CommunitySpace({ Message, Annonce ,Room}) {
   /*Suppression d'annonces */
   const deleteAnnonce = async (index) => {
     try {
-      // Accéder au document spécifique de la communauté
-      const communityDocRef = doc(db, "communities", CommuID); // Remplace CommuID par l'ID de ta communauté
+      const communityDocRef = doc(db, "communities", CommuID); 
       const communityDocSnapshot = await getDoc(communityDocRef); 
-  
       if (communityDocSnapshot.exists()) {
         const currentAnnonces = communityDocSnapshot.data().announcements;
-  
-        // Vérifier que l'index est valide
         if (index >= 0 && index < currentAnnonces.length) {
-          // Supprimer l'annonce à l'index donné
           const updatedAnnonces = currentAnnonces.filter((_, idx) => idx !== index);
-  
-          // Mettre à jour le document dans Firestore en supprimant l'annonce
           await updateDoc(communityDocRef, {
-            announcements: updatedAnnonces, // Mettre à jour le champ 'announcements'
+            announcements: updatedAnnonces,
           });
   
           // Mettre à jour l'état local
@@ -99,18 +80,12 @@ export default function CommunitySpace({ Message, Annonce ,Room}) {
   const addAnnonce = async () => {
     if (newAnnonce.trim() !== '') {
       try {
-        const newAnnonceObj = newAnnonce; // C'est une chaîne de caractères
-  
-        // Accéder au document spécifique de la communauté
+        const newAnnonceObj = newAnnonce;
         const communityDocRef = doc(db, "communities", CommuID);
         const communityDocSnapshot = await getDoc(communityDocRef);
-  
         if (communityDocSnapshot.exists()) {
           const currentAnnonces = communityDocSnapshot.data().announcements || [];
-  
-          // Ajouter la nouvelle annonce au tableau existant
           const updatedAnnonces = [...currentAnnonces, newAnnonceObj];
-  
           // Mettre à jour le document dans Firestore
           await updateDoc(communityDocRef, {
             announcements: updatedAnnonces,
@@ -118,7 +93,7 @@ export default function CommunitySpace({ Message, Annonce ,Room}) {
   
           // Mettre à jour l'état local
           setAnnonces(updatedAnnonces);
-          setNewAnnonce(''); // Réinitialiser le champ d'entrée
+          setNewAnnonce('');
         } else {
           console.log("Le document de la communauté n'existe pas !");
         }
