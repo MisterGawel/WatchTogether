@@ -11,7 +11,7 @@ import CardAnnonce from './CardAnnonces'
 import InputAnnonce from './inputAnnonce'
 import InputRoom from './InputRoom';
 export default function CommunitySpace({ Message, Annonce ,Room}) {
-  const CommuID = 'VmcNk4sdbnp5Y1NoSeH5'
+  const CommuID = 'UIyd1HlGNJACSPUNP2pl'
   const [rooms, setRoom] = useState([]);
   const [nomCommu, setNomCommu] = useState(''); 
   const [annonces, setAnnonces] = useState([]);
@@ -63,8 +63,7 @@ export default function CommunitySpace({ Message, Annonce ,Room}) {
           await updateDoc(communityDocRef, {
             announcements: updatedAnnonces,
           });
-  
-          // Mettre à jour l'état local
+
           setAnnonces(updatedAnnonces);
         } else {
           console.log("Index d'annonce invalide !",index);
@@ -109,20 +108,16 @@ export default function CommunitySpace({ Message, Annonce ,Room}) {
         const communityDocSnapshot = await getDoc(communityDocRef);
         
         if (communityDocSnapshot.exists()) {
-          const currentRooms = communityDocSnapshot.data().rooms || []; // Liste des rooms
+          const currentRooms = communityDocSnapshot.data().rooms || []; 
     
           // Vérifier si la roomId existe dans la liste
           console.log("current room : ",currentRooms,"roomID : ",roomId)
           if (currentRooms.includes(roomId)) {
-
             const roomDocRef = doc(db, "rooms", roomId);
             await deleteDoc(roomDocRef);
             const updatedRooms = currentRooms.filter((id) => id !== roomId);
             await updateDoc(communityDocRef, { rooms: updatedRooms });
             setRoom((prevRooms) => prevRooms.filter((room) => room.id !== roomId));
-
-    
-            console.log(`Salle ${roomId} supprimée avec succès.`);
           } else {
             console.log("L'ID de la salle ne se trouve pas dans la communauté !");
           }
@@ -212,7 +207,7 @@ export default function CommunitySpace({ Message, Annonce ,Room}) {
         </div>
         {/* Section Chat */}
         <div className="flex-1 bg-grey-100 p-4">
-          <ChatCommu Message={Message} Role={role}/>
+          <ChatCommu roomId={CommuID} Role={role}/>
         </div>
       </div>
     </div>
