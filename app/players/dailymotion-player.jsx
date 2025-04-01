@@ -1,10 +1,7 @@
-"use client";
-
 const DailyMotionPlayer = ({ videoId }) => (
     <iframe
         src={`https://geo.dailymotion.com/player.html?video=${videoId}`}
-        allow="autoplay; fullscreen"
-        allowFullScreen
+        title='dailymotion-player'
     ></iframe>
 );
 
