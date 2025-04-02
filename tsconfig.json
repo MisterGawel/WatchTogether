@@ -28,7 +28,7 @@
 		"**/*.ts",
 		"**/*.tsx",
 		".next/types/**/*.ts",
-		"firebase.js",
+		"app/firebase.js",
 		"app/players/youtube-player.jsx",
 		"tailwind.config.js"
 	],

@@ -2,10 +2,11 @@
 
 import React from 'react';
 import { Form, Input, Button, Link } from '@heroui/react';
-import { auth, db } from '@/firebase';
+import { auth, db } from '@/app/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ValidationError } from 'next/dist/compiled/amphtml-validator';
 import { doc, setDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface FormData {
 	name: string;

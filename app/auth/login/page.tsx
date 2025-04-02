@@ -2,8 +2,13 @@
 
 import React from 'react';
 import { Form, Input, Button, Link } from '@heroui/react';
-import { auth } from '@/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/app/firebase';
+import {
+	signInWithEmailAndPassword,
+	setPersistence,
+	browserLocalPersistence,
+} from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface FormData {
 	email: string;
@@ -18,21 +23,27 @@ export default function LoginPage() {
 	});
 	const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+	const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setLoading(true);
 
-		signInWithEmailAndPassword(auth, dataForm.email, dataForm.password)
-			.then((userCredential) => {
-				const user = userCredential.user;
-				console.log(user);
-				setLoading(false);
-			})
-			.catch((error) => {
-				const errorMessage = error.message;
-				setErrorMessage(errorMessage);
-				setLoading(false);
-			});
+		try {
+			await setPersistence(auth, browserLocalPersistence);
+			const userCredential = await signInWithEmailAndPassword(
+				auth,
+				dataForm.email,
+				dataForm.password
+			);
+			console.log(userCredential.user);
+		} catch (error) {
+			if (error instanceof Error) {
+				setErrorMessage(error.message);
+			} else {
+				setErrorMessage('Une erreur est survenue');
+			}
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -78,7 +89,7 @@ export default function LoginPage() {
 					<Button
 						type="submit"
 						color="primary"
-						className="w-full mt-4"
+						className="mx-auto mt-4 w-fit"
 						isLoading={loading}
 					>
 						Se connecter
