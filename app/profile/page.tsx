@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { auth } from '@/firebase';
+import { auth } from '@/app/firebase';
 import { signOut } from 'firebase/auth';
 import { User } from 'firebase/auth';
 
