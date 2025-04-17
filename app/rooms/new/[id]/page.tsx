@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { db } from "../../../../firebase";
-import { doc, getDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, deleteDoc, writeBatch, collection, getDocs } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import ChatRoom from "./chat";
 import ChatVideos from "./chatVideos";
+import { onAuthStateChanged } from 'firebase/auth';
 
 const CURRENT_USER_ID = "2";
 
@@ -75,6 +76,8 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
         fetchRoomData();
     }, [params]);
 
+
+    
     const handleCopyLink = () => {
         if (resolvedParams?.id) {
             const roomLink = `${window.location.origin}/rooms/new/${resolvedParams.id}`;
@@ -98,6 +101,48 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
             alert("Une erreur est survenue lors de la suppression");
         }
     };
+
+    
+
+    const handleDeleteAllMessages = async () => {
+        if (!resolvedParams?.id) return;
+    
+        const batch = writeBatch(db);
+        const messagesRef = collection(db, `chats/${resolvedParams.id}/messages`);
+        const messagesSnapshot = await getDocs(messagesRef);
+    
+        messagesSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+    
+        await batch.commit();
+        alert("Tous les messages ont été supprimés !");
+    };
+
+    const handleDeleteAllLinks = async () => {
+        if (!resolvedParams?.id) return;
+    
+        const batch = writeBatch(db);
+    
+        const waitLinksRef = collection(db, `chats/${resolvedParams.id}/wait_links`);
+        const histLinksRef = collection(db, `chats/${resolvedParams.id}/hist_links`);
+    
+        const waitLinksSnapshot = await getDocs(waitLinksRef);
+        const histLinksSnapshot = await getDocs(histLinksRef);
+    
+        waitLinksSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+    
+        histLinksSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+    
+        await batch.commit();
+        alert("Tous les liens (wait + hist) ont été supprimés !");
+    };
+    
+    
 
     const message = `Rejoignez ma room ${roomData?.name} sur ${window.location.href}`;
 
@@ -198,11 +243,14 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
                 </div>
                 {/* Espace de chat vidéo sous la vidéo */}
                 <div className="p-4 bg-white dark:bg-gray-800 rounded-lg mt-4 shadow-lg">
-                    <ChatVideos
-                        Message={[]}
-                        Role={isAdmin ? "admin" : "user"}
+                <ChatVideos 
+                    roomId={resolvedParams?.id} // Utilisez la variable roomId plutôt qu'une string fixe
+                    currentUser={"2"} // Passez le nom d'utilisateur actuel
+                    initialMessages={[]}
+                    Role={isAdmin ? "admin" : "user"}
                     />
                 </div>
+
             </div>
 
 
@@ -211,11 +259,13 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
             <div className="lg:col-span-2">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg h-full">
                     <ChatRoom 
-                        Message={[]}
-                        Role={isAdmin ? "admin" : "user"}
+                    roomId={resolvedParams?.id} // Utilisez la variable roomId plutôt qu'une string fixe
+                    currentUser={"2"} // Passez le nom d'utilisateur actuel
+                    initialMessages={[]}
+                    Role={isAdmin ? "admin" : "user"}
                     />
                 </div>
-            </div>
+                </div>
 
 
             </main>
@@ -323,6 +373,21 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
                                                 <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                                             </svg>
                                             Supprimer
+                                        </button>
+
+                                        <button
+                                            onClick={handleDeleteAllMessages}
+                                            className="w-full py-2 px-4 bg-red-400 hover:bg-red-500 text-white rounded-md mt-4"
+                                        >
+                                            Supprimer tous les messages
+                                        </button>
+
+
+                                        <button
+                                            onClick={handleDeleteAllLinks}
+                                            className="w-full py-2 px-4 bg-red-400 hover:bg-red-500 text-white rounded-md mt-4"
+                                        >
+                                            Supprimer tous liens
                                         </button>
                                     </div>
                                 </div>

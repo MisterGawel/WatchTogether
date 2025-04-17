@@ -1,5 +1,5 @@
 import { db } from "../../../firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, updateDoc, doc,arrayUnion } from "firebase/firestore";
 
 export const createRoom = async (roomName: string, communityID: string, idAdmin: string) => {
     // Validation
@@ -18,6 +18,14 @@ export const createRoom = async (roomName: string, communityID: string, idAdmin:
         });
 
         console.log("Room créée avec ID :", docRef.id);
+
+        // Mise à jour de la communauté pour ajouter l'ID de la nouvelle room
+        const communityRef = doc(db, "communities", communityID);
+        
+        await updateDoc(communityRef, {
+            rooms: arrayUnion(docRef.id)
+        });
+        
         return docRef.id;
 
     } catch (error) {
