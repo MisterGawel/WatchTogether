@@ -5,15 +5,8 @@ import { Card } from "@heroui/react";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { db } from '@/firebase';
-import {
-  collection,
-  addDoc,
-  getDocs,
-  serverTimestamp,
-  deleteDoc,
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import {collection,addDoc,getDocs,serverTimestamp,deleteDoc,doc,getDoc} from "firebase/firestore";
+import YoutubePlayer from '../../../players/youtube-player';
 
 type Message = {
   id: string;
@@ -44,6 +37,47 @@ export default function ChatVideos({
 
   const messagesRef = collection(db, `chats/${roomId}/wait_links`);
   const histRef = collection(db, `chats/${roomId}/hist_links`);
+  const lectureRef = collection(db, `chats/${roomId}/lecture`);
+
+  // Fonction pour extraire l'ID YouTube
+  const extractYouTubeId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? match[2] : null;
+  };
+
+  const getVideoPreview = (url: string) => {
+    const youtubeId = extractYouTubeId(url);
+    if (youtubeId) {
+      return (
+        <div className="w-full aspect-video mt-2">
+          <YoutubePlayer 
+            videoId={youtubeId}
+          />
+        </div>
+      );
+    }
+
+    const vimeoPattern = /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/;
+    const matchVimeo = url.match(vimeoPattern);
+
+    if (matchVimeo) {
+      const videoId = matchVimeo[1];
+      return (
+        <iframe
+          width="100%"
+          className="aspect-video mt-2"
+          src={`https://player.vimeo.com/video/${videoId}`}
+          frameBorder="0"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
+          title="Video Preview"
+        ></iframe>
+      );
+    }
+
+    return null;
+  };
 
   useEffect(() => {
     const fetchAdmin = async () => {
@@ -61,46 +95,6 @@ export default function ChatVideos({
 
     fetchAdmin();
   }, [roomId]);
-
-  const getVideoPreview = (url: string) => {
-    const youtubePattern = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/;
-    const matchYoutube = url.match(youtubePattern);
-
-    if (matchYoutube) {
-      const videoId = matchYoutube[1];
-      return (
-        <iframe
-          width="200"
-          height="113"
-          src={`https://www.youtube.com/embed/${videoId}`}
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          title="Video Preview"
-        ></iframe>
-      );
-    }
-
-    const vimeoPattern = /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/;
-    const matchVimeo = url.match(vimeoPattern);
-
-    if (matchVimeo) {
-      const videoId = matchVimeo[1];
-      return (
-        <iframe
-          width="200"
-          height="113"
-          src={`https://player.vimeo.com/video/${videoId}`}
-          frameBorder="0"
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowFullScreen
-          title="Video Preview"
-        ></iframe>
-      );
-    }
-
-    return null;
-  };
 
   const fetchMessages = async () => {
     const snapshot = await getDocs(messagesRef);
@@ -132,6 +126,11 @@ export default function ChatVideos({
     setMessages(fetched);
   };
 
+  const checkLectureEmpty = async () => {
+    const lectureSnapshot = await getDocs(lectureRef);
+    return lectureSnapshot.empty;
+  };
+
   useEffect(() => {
     if (viewMode === 'chat') {
       fetchMessages();
@@ -143,16 +142,28 @@ export default function ChatVideos({
   const sendMessage = async () => {
     if (newMessage.trim() === "") return;
 
-    const isVideoLink = getVideoPreview(newMessage);
+    const isVideoLink = extractYouTubeId(newMessage) || newMessage.includes('vimeo.com');
 
     if (isVideoLink) {
       try {
-        await addDoc(messagesRef, {
-          text: newMessage,
-          user: currentUser,
-          timestamp: serverTimestamp(),
-        });
-        fetchMessages();
+        const isLectureEmpty = await checkLectureEmpty();
+        
+        if (isLectureEmpty) {
+          // Ajouter directement à lecture si vide
+          await addDoc(lectureRef, {
+            text: newMessage,
+            user: currentUser,
+            timestamp: serverTimestamp(),
+          });
+        } else {
+          // Sinon ajouter à wait_links
+          await addDoc(messagesRef, {
+            text: newMessage,
+            user: currentUser,
+            timestamp: serverTimestamp(),
+          });
+          await fetchMessages();
+        }
       } catch (error) {
         console.error("Erreur d'envoi:", error);
       }
@@ -162,7 +173,7 @@ export default function ChatVideos({
   };
 
   const handleDeleteMessage = async (id: string) => {
-    if (admin === currentUser) {
+    if (admin === currentUser || Role === 'admin') {
       try {
         await deleteDoc(doc(db, `chats/${roomId}/wait_links/${id}`));
         fetchMessages();
@@ -172,59 +183,70 @@ export default function ChatVideos({
     }
   };
 
-  const toggleExpandMessage = (id: string) => {
-    setExpandedMessage(expandedMessage === id ? null : id);
-  };
-
-  // 👇 Automatisation du déplacement du lien le plus vieux vers hist_links
+  // Gestion automatique de la file d'attente
   useEffect(() => {
-    const interval = setInterval(async () => {
-      if (viewMode === 'chat' && videoLinks.length > 0) {
-        const oldest = videoLinks[0];
+    const checkAndMoveVideo = async () => {
+      const isLectureEmpty = await checkLectureEmpty();
 
+      if (isLectureEmpty && videoLinks.length > 0) {
+        const oldest = videoLinks[0];
+        
         try {
-          // Ajouter à hist_links
-          await addDoc(histRef, {
+          // Déplacer la plus ancienne vers lecture
+          await addDoc(lectureRef, {
             text: oldest.text,
             user: oldest.user,
-            timestamp: oldest.timestamp,
+            timestamp: serverTimestamp(),
           });
 
           // Supprimer de wait_links
           await deleteDoc(doc(db, `chats/${roomId}/wait_links/${oldest.id}`));
 
-          // Mettre à jour la liste
-          fetchMessages();
+          // Mettre à jour la liste d'attente
+          await fetchMessages();
         } catch (error) {
-          console.error("Erreur de déplacement vers historique:", error);
+          console.error("Erreur de déplacement vers lecture:", error);
         }
       }
-    }, 10000); // toutes les 10 secondes
+    };
 
+    const interval = setInterval(checkAndMoveVideo, 10000);
     return () => clearInterval(interval);
   }, [videoLinks, viewMode, roomId]);
+
+  const toggleExpandMessage = (id: string) => {
+    setExpandedMessage(expandedMessage === id ? null : id);
+  };
 
   const MAX_LENGTH = 100;
 
   return (
-    <div>
-      <h1 className="text-xl font-bold text-center p-4 bg-grey-100 shadow-md">Espace de Chat Video</h1>
+    <div className="flex flex-col h-full">
+      <h1 className="text-xl font-bold text-center p-4 bg-gray-100 dark:bg-gray-800 shadow-md">
+        Espace de Chat Video
+      </h1>
 
       <div className="flex justify-between p-4">
-        <Button onClick={() => setViewMode('history')} className="w-full bg-blue-500 text-white py-2 px-4 rounded-md">
+        <Button 
+          onClick={() => setViewMode('history')} 
+          className={`w-full py-2 px-4 rounded-md ${viewMode === 'history' ? 'bg-blue-600' : 'bg-blue-500'} text-white`}
+        >
           Historique
         </Button>
-        <Button onClick={() => setViewMode('chat')} className="w-full bg-green-500 text-white py-2 px-4 rounded-md">
+        <Button 
+          onClick={() => setViewMode('chat')} 
+          className={`w-full py-2 px-4 rounded-md ${viewMode === 'chat' ? 'bg-green-600' : 'bg-green-500'} text-white`}
+        >
           Liste de vidéos
         </Button>
       </div>
 
-      <div className="flex-grow overflow-y-auto p-4 space-y-2 bg-white">
+      <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-white dark:bg-gray-900">
         {viewMode === 'history' ? (
           messages.map((msg) => (
-            <Card key={msg.id} className="p-2 relative">
-              <p className="font-semibold">{msg.user}</p>
-              <p>{msg.text}</p>
+            <Card key={msg.id} className="p-4 relative dark:bg-gray-800">
+              <p className="font-semibold dark:text-white">{msg.user}</p>
+              <p className="dark:text-gray-300">{msg.text}</p>
               {getVideoPreview(msg.text)}
             </Card>
           ))
@@ -237,26 +259,26 @@ export default function ChatVideos({
                 : msg.text;
 
             return (
-              <Card key={msg.id} className="p-2 relative">
-                <p className="font-semibold">{msg.user}</p>
-                {admin === currentUser && (
+              <Card key={msg.id} className="p-4 relative dark:bg-gray-800">
+                <p className="font-semibold dark:text-white">{msg.user}</p>
+                {(admin === currentUser || Role === 'admin') && (
                   <Button
                     isIconOnly
                     size="sm"
                     variant="light"
                     color="danger"
                     onPress={() => handleDeleteMessage(msg.id)}
-                    className="absolute top-1 right-1"
+                    className="absolute top-2 right-2"
                   >
                     ×
                   </Button>
                 )}
-                <p>{truncatedText}</p>
+                <p className="dark:text-gray-300">{truncatedText}</p>
                 {getVideoPreview(msg.text)}
                 {msg.text.length > MAX_LENGTH && (
                   <Button
                     onPress={() => toggleExpandMessage(msg.id)}
-                    className="text-blue-500 text-sm underline p-0 ml-2 inline-flex items-center"
+                    className="text-blue-500 dark:text-blue-400 text-sm underline p-0 ml-2 inline-flex items-center"
                   >
                     {isMessageExpanded ? "Voir moins" : "Voir plus"}
                   </Button>
@@ -268,14 +290,17 @@ export default function ChatVideos({
       </div>
 
       {viewMode === 'chat' && (
-        <div className="p-4 bg-white flex space-x-2">
+        <div className="p-4 bg-white dark:bg-gray-800 flex space-x-2">
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Écrivez un lien vidéo..."
-            className="flex-grow"
+            className="flex-grow dark:bg-gray-700 dark:text-white"
           />
-          <Button onClick={sendMessage} className="flex items-center gap-2">
+          <Button 
+            onClick={sendMessage} 
+            className="flex items-center gap-2 bg-purple-500 hover:bg-purple-600 text-white"
+          >
             Envoyer
           </Button>
         </div>
