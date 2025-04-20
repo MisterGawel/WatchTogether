@@ -6,7 +6,6 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { db } from '@/firebase';
 import {collection,addDoc,getDocs,serverTimestamp,deleteDoc,doc,getDoc} from "firebase/firestore";
-import YoutubePlayer from '../../../players/youtube-player';
 
 type Message = {
   id: string;
@@ -34,6 +33,7 @@ export default function ChatVideos({
   const [viewMode, setViewMode] = useState<'history' | 'chat'>('chat');
   const [videoLinks, setVideoLinks] = useState<Message[]>([]);
   const [admin, setAdmin] = useState<string | null>(null);
+  const [videoTitles, setVideoTitles] = useState<Record<string, string>>({});
 
   const messagesRef = collection(db, `chats/${roomId}/wait_links`);
   const histRef = collection(db, `chats/${roomId}/hist_links`);
@@ -46,37 +46,44 @@ export default function ChatVideos({
     return match && match[2].length === 11 ? match[2] : null;
   };
 
-  const getVideoPreview = (url: string) => {
-    const youtubeId = extractYouTubeId(url);
-    if (youtubeId) {
-      return (
-        <div className="w-full aspect-video mt-2">
-          <YoutubePlayer 
-            videoId={youtubeId}
-          />
-        </div>
-      );
+  const getVideoInfo = async (url: string) => {
+    try {
+      const youtubeId = extractYouTubeId(url);
+      if (youtubeId) {
+        const response = await fetch(
+          `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${youtubeId}&format=json`
+        );
+        const data = await response.json();
+        return data.title;
+      }
+
+      const vimeoPattern = /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/;
+      const matchVimeo = url.match(vimeoPattern);
+      if (matchVimeo) {
+        const videoId = matchVimeo[1];
+        const response = await fetch(
+          `https://vimeo.com/api/v2/video/${videoId}.json`
+        );
+        const data = await response.json();
+        return data[0].title;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error fetching video title:", error);
+      return null;
     }
+  };
 
-    const vimeoPattern = /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/;
-    const matchVimeo = url.match(vimeoPattern);
-
-    if (matchVimeo) {
-      const videoId = matchVimeo[1];
-      return (
-        <iframe
-          width="100%"
-          className="aspect-video mt-2"
-          src={`https://player.vimeo.com/video/${videoId}`}
-          frameBorder="0"
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowFullScreen
-          title="Video Preview"
-        ></iframe>
-      );
+  const fetchVideoTitles = async (links: Message[]) => {
+    const titles: Record<string, string> = {};
+    for (const link of links) {
+      const title = await getVideoInfo(link.text);
+      if (title) {
+        titles[link.id] = title;
+      }
     }
-
-    return null;
+    setVideoTitles(titles);
   };
 
   useEffect(() => {
@@ -109,6 +116,7 @@ export default function ChatVideos({
     });
     links.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
     setVideoLinks(links);
+    fetchVideoTitles(links);
   };
 
   const fetchHistory = async () => {
@@ -124,6 +132,7 @@ export default function ChatVideos({
     });
     fetched.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     setMessages(fetched);
+    fetchVideoTitles(fetched);
   };
 
   const checkLectureEmpty = async () => {
@@ -149,14 +158,12 @@ export default function ChatVideos({
         const isLectureEmpty = await checkLectureEmpty();
         
         if (isLectureEmpty) {
-          // Ajouter directement à lecture si vide
           await addDoc(lectureRef, {
             text: newMessage,
             user: currentUser,
             timestamp: serverTimestamp(),
           });
         } else {
-          // Sinon ajouter à wait_links
           await addDoc(messagesRef, {
             text: newMessage,
             user: currentUser,
@@ -183,7 +190,6 @@ export default function ChatVideos({
     }
   };
 
-  // Gestion automatique de la file d'attente
   useEffect(() => {
     const checkAndMoveVideo = async () => {
       const isLectureEmpty = await checkLectureEmpty();
@@ -192,17 +198,14 @@ export default function ChatVideos({
         const oldest = videoLinks[0];
         
         try {
-          // Déplacer la plus ancienne vers lecture
           await addDoc(lectureRef, {
             text: oldest.text,
             user: oldest.user,
             timestamp: serverTimestamp(),
           });
 
-          // Supprimer de wait_links
           await deleteDoc(doc(db, `chats/${roomId}/wait_links/${oldest.id}`));
 
-          // Mettre à jour la liste d'attente
           await fetchMessages();
         } catch (error) {
           console.error("Erreur de déplacement vers lecture:", error);
@@ -237,7 +240,7 @@ export default function ChatVideos({
           onClick={() => setViewMode('chat')} 
           className={`w-full py-2 px-4 rounded-md ${viewMode === 'chat' ? 'bg-green-600' : 'bg-green-500'} text-white`}
         >
-          Liste de vidéos
+          Liste d'attente
         </Button>
       </div>
 
@@ -247,7 +250,11 @@ export default function ChatVideos({
             <Card key={msg.id} className="p-4 relative dark:bg-gray-800">
               <p className="font-semibold dark:text-white">{msg.user}</p>
               <p className="dark:text-gray-300">{msg.text}</p>
-              {getVideoPreview(msg.text)}
+              {videoTitles[msg.id] && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {videoTitles[msg.id]}
+                </p>
+              )}
             </Card>
           ))
         ) : (
@@ -274,7 +281,11 @@ export default function ChatVideos({
                   </Button>
                 )}
                 <p className="dark:text-gray-300">{truncatedText}</p>
-                {getVideoPreview(msg.text)}
+                {videoTitles[msg.id] && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {videoTitles[msg.id]}
+                  </p>
+                )}
                 {msg.text.length > MAX_LENGTH && (
                   <Button
                     onPress={() => toggleExpandMessage(msg.id)}
