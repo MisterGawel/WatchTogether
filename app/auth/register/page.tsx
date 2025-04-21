@@ -63,6 +63,9 @@ export default function RegisterPage() {
 						label="Nom"
 						labelPlacement="outside"
 						name="name"
+						classNames={{
+							input: 'placeholder:text-sm',
+						}}
 						value={dataForm.name}
 						onChange={(e) =>
 							setDataForm({ ...dataForm, name: e.target.value })
@@ -77,6 +80,9 @@ export default function RegisterPage() {
 						label="Email"
 						labelPlacement="outside"
 						name="email"
+						classNames={{
+							input: 'placeholder:text-sm',
+						}}
 						value={dataForm.email}
 						onChange={(e) =>
 							setDataForm({ ...dataForm, email: e.target.value })
@@ -92,6 +98,9 @@ export default function RegisterPage() {
 						label="Mot de passe"
 						labelPlacement="outside"
 						name="password"
+						classNames={{
+							input: 'placeholder:text-sm',
+						}}
 						value={dataForm.password}
 						onChange={(e) =>
 							setDataForm({
@@ -115,6 +124,9 @@ export default function RegisterPage() {
 						label="Confirmation de mot de passe"
 						labelPlacement="outside"
 						name="password"
+						classNames={{
+							input: 'placeholder:text-sm',
+						}}
 						value={dataForm.confirmPassword}
 						onChange={(e) =>
 							setDataForm({
@@ -130,9 +142,9 @@ export default function RegisterPage() {
 					<Button
 						type="submit"
 						color="primary"
-						className="w-full mt-4"
+						className="px-10 mx-auto mt-4 w-fit"
 					>
-						Se connecter
+						S&apos;inscrire
 					</Button>
 					<div className="flex justify-center w-full mt-4">
 						<Link
