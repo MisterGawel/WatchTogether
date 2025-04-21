@@ -18,8 +18,8 @@ import CardRoom from './CardRoom';
 import CardAnnonce from './CardAnnonces';
 import InputAnnonce from './inputAnnonce';
 import InputRoom from './InputRoom';
-export default function CommunitySpace({ Message, Annonce, Room }) {
-	const CommuID = 'VmcNk4sdbnp5Y1NoSeH5';
+export default function CommunitySpace({Room}) {
+	const CommuID = Room;
 	const [rooms, setRoom] = useState([]);
 	const [nomCommu, setNomCommu] = useState('');
 	const [annonces, setAnnonces] = useState([]);
