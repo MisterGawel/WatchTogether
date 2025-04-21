@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import {
+	getDoc,
 	collection,
 	addDoc,
 	query,
@@ -12,14 +13,14 @@ import {
 import { Card } from '@heroui/react';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
-import { db } from '@/app/firebase';
-
+import { db,auth } from '@/app/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 export default function ChatCommu({ Role, roomId }) {
 	const [messages, setMessages] = useState([]);
 	const [newMessage, setNewMessage] = useState('');
 	const [expandedMessage, setExpandedMessage] = useState(null);
 	const User1 = 'Alexis'; // Remplace par l'utilisateur actuel
-
+	const [userName, setUserName] = useState(''); // Nouvel état pour le nom de l'utilisateur
 	const messagesRef = collection(db, `chats/${roomId}/messages`);
 
 	useEffect(() => {
@@ -35,11 +36,35 @@ export default function ChatCommu({ Role, roomId }) {
 		return () => unsubscribe(); // Nettoie l'écouteur quand le composant est démonté
 	}, [roomId]);
 
+	
+	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+		  if (currentUser) {
+			// Récupère le document utilisateur dans Firestore en utilisant l'UID
+			const docRef = doc(db, 'users', currentUser.uid);
+			const docSnap = await getDoc(docRef);
+	
+			if (docSnap.exists()) {
+			  const data = docSnap.data();
+			  setUserName(data.name);
+			} else {
+			  console.log("Aucun utilisateur trouvé pour cet UID.");
+			}
+		  } else {
+			setUserName('');
+		  }
+		});
+	
+		// Nettoyage de l'écouteur d'état d'authentification lors du démontage du composant
+		return () => unsubscribe();
+	  }, []);
+
+
 	const sendMessage = async () => {
 		if (newMessage.trim() !== '') {
 			await addDoc(messagesRef, {
 				text: newMessage,
-				user: User1,
+				user: userName,
 				timestamp: Date.now(),
 			});
 			setNewMessage(''); // Réinitialiser le champ après l'envoi

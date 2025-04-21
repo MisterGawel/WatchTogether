@@ -19,12 +19,14 @@ import CardAnnonce from './CardAnnonces';
 import InputAnnonce from './inputAnnonce';
 import InputRoom from './InputRoom';
 export default function CommunitySpace({ Message, Annonce, Room }) {
-	const CommuID = 'UIyd1HlGNJACSPUNP2pl';
+	const CommuID = 'VmcNk4sdbnp5Y1NoSeH5';
 	const [rooms, setRoom] = useState([]);
 	const [nomCommu, setNomCommu] = useState('');
 	const [annonces, setAnnonces] = useState([]);
 	const [newAnnonce, setNewAnnonce] = useState('');
 	const [newRoomName, setNewRoomName] = useState('');
+	const [user, setUser] = useState(null);
+	const [communities, setCommunities] = useState({});//Communaute du user
 	// Fonction pour ajouter une salle à Firestore et à l'état local
 	const addRoom = async () => {
 		const newRoomId = Date.now().toString();
@@ -50,17 +52,17 @@ export default function CommunitySpace({ Message, Annonce, Room }) {
 						...prevRooms,
 						{ id: newRoomId, name: newRoomName, member: {} },
 					]);
-					console.log('Salle ajoutée avec succès !');
+					// console.log('Salle ajoutée avec succès !');
 				} else {
-					console.log("Le document de la communauté n'existe pas !");
+					// console.log("Le document de la communauté n'existe pas !");
 				}
 				// Réinitialiser les champs
 				setNewRoomName('');
 			} catch (error) {
-				console.error("Erreur lors de l'ajout de la salle :", error);
+				// console.error("Erreur lors de l'ajout de la salle :", error);
 			}
 		} else {
-			console.log('Tous les champs doivent être remplis !');
+			// console.log('Tous les champs doivent être remplis !');
 		}
 	};
 	/*Suppression d'annonces */
@@ -81,16 +83,16 @@ export default function CommunitySpace({ Message, Annonce, Room }) {
 
 					setAnnonces(updatedAnnonces);
 				} else {
-					console.log("Index d'annonce invalide !", index);
+					// console.log("Index d'annonce invalide !", index);
 				}
 			} else {
-				console.log("Le document de la communauté n'existe pas !");
+				// console.log("Le document de la communauté n'existe pas !");
 			}
 		} catch (error) {
-			console.error(
-				"Erreur lors de la suppression de l'annonce :",
-				error
-			);
+			// console.error(
+			// 	"Erreur lors de la suppression de l'annonce :",
+			// 	error
+			// );
 		}
 	};
 	/*AJOUT D'ANNONCE*/
@@ -113,10 +115,10 @@ export default function CommunitySpace({ Message, Annonce, Room }) {
 					setAnnonces(updatedAnnonces);
 					setNewAnnonce('');
 				} else {
-					console.log("Le document de la communauté n'existe pas !");
+					// console.log("Le document de la communauté n'existe pas !");
 				}
 			} catch (error) {
-				console.error("Erreur lors de l'ajout de l'annonce :", error);
+				// console.error("Erreur lors de l'ajout de l'annonce :", error);
 			}
 		}
 	};
@@ -130,12 +132,12 @@ export default function CommunitySpace({ Message, Annonce, Room }) {
 				const currentRooms = communityDocSnapshot.data().rooms || [];
 
 				// Vérifier si la roomId existe dans la liste
-				console.log(
-					'current room : ',
-					currentRooms,
-					'roomID : ',
-					roomId
-				);
+				// console.log(
+				// 	'current room : ',
+				// 	currentRooms,
+				// 	'roomID : ',
+				// 	roomId
+				// );
 				if (currentRooms.includes(roomId)) {
 					const roomDocRef = doc(db, 'rooms', roomId);
 					await deleteDoc(roomDocRef);
@@ -147,15 +149,15 @@ export default function CommunitySpace({ Message, Annonce, Room }) {
 						prevRooms.filter((room) => room.id !== roomId)
 					);
 				} else {
-					console.log(
-						"L'ID de la salle ne se trouve pas dans la communauté !"
-					);
+					// console.log(
+					// 	"L'ID de la salle ne se trouve pas dans la communauté !"
+					// );
 				}
 			} else {
-				console.log("Le document de la communauté n'existe pas !");
+				// console.log("Le document de la communauté n'existe pas !");
 			}
 		} catch (error) {
-			console.error('Erreur lors de la suppression de la salle :', error);
+			// console.error('Erreur lors de la suppression de la salle :', error);
 		}
 	};
 
@@ -173,11 +175,11 @@ export default function CommunitySpace({ Message, Annonce, Room }) {
 					const roomRef = doc(db, 'rooms', roomId);
 					const roomSnapshot = await getDoc(roomRef);
 					if (!roomSnapshot.exists()) {
-						console.log(
-							`La room avec ID ${roomId} n'existe pas dans Firestore.`
-						);
+						// console.log(
+						// 	`La room avec ID ${roomId} n'existe pas dans Firestore.`
+						// );
 					} else {
-						console.log(` Room trouvée :`, roomSnapshot.data());
+						// console.log(` Room trouvée :`, roomSnapshot.data());
 					}
 					return roomSnapshot.exists()
 						? { id: roomId, ...roomSnapshot.data() }
@@ -197,37 +199,55 @@ export default function CommunitySpace({ Message, Annonce, Room }) {
 
 					setAnnonces(announcements); // Mettre à jour l'état avec les annonces récupérées
 				} else {
-					console.log(
-						"Le champ 'announcements ou rooms' n'est pas un tableau."
-					);
+					// console.log(
+					// 	"Le champ 'announcements ou rooms' n'est pas un tableau."
+					// );
 				}
 			} else {
-				console.log("Le document de la communauté n'existe pas !");
+				// console.log("Le document de la communauté n'existe pas !");
 			}
 		} catch (error) {
-			console.error(
-				'Erreur lors de la récupération des données :',
-				error
-			);
+			// console.error(
+				// 'Erreur lors de la récupération des données :',
+				// error
+			// );
 		}
 	};
-
-	onAuthStateChanged(auth, (user) => {
-		if (user) {
-			console.log('Utilisateur détecté au chargement :', user);
-		} else {
-			console.log('Aucun utilisateur détecté après refresh.');
-		}
-	});
-
+	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+			if (currentUser) {
+				setUser(currentUser);
+	
+				const docRef = doc(db, 'users', currentUser.uid);
+				const docSnap = await getDoc(docRef);
+	
+				if (docSnap.exists()) {
+					const data = docSnap.data();
+					setCommunities(data.communities || {});
+				}
+			} else {
+				setUser(null);
+				setCommunities({});
+			}
+		});
+	
+		return () => unsubscribe();
+	}, []);
 	useEffect(() => {
 		DonnéesBase();
 	}, []); // Exécuter une seule fois au chargement
 
-	const user = auth.currentUser;
-	console.log('user : ', user);
 
-	const role = 'admin'; // À récupérer dynamiquement avec une BDD
+
+
+	const isAdmin = (communityId)  => {
+		return communities[communityId] === 'admin';
+	};
+	console.log('user : ', user);
+	let role ='member'
+	if (isAdmin(CommuID)){
+		role = 'admin';
+	}
 	return (
 		<div className="flex flex-col min-h-screen bg-gray-100">
 			{/* En-tête avec le nom de la communauté */}
