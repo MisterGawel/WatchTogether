@@ -39,36 +39,77 @@ export default function ChatVideos({
   const histRef = collection(db, `chats/${roomId}/hist_links`);
   const lectureRef = collection(db, `chats/${roomId}/lecture`);
 
-  // Fonction pour extraire l'ID YouTube
-  const extractYouTubeId = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return match && match[2].length === 11 ? match[2] : null;
+  // Fonction pour extraire l'ID de la vidéo en fonction de la plateforme
+  const extractVideoInfo = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname;
+
+      if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) {
+        // YouTube
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return {
+          platform: 'youtube',
+          id: match && match[2].length === 11 ? match[2] : null
+        };
+      } else if (hostname.includes('dailymotion.com') || hostname.includes('dai.ly')) {
+        // Dailymotion
+        const regExp = /^.*(dailymotion.com\/video\/|dai.ly\/)([^_]+).*/;
+        const match = url.match(regExp);
+        return {
+          platform: 'dailymotion',
+          id: match ? match[2] : null
+        };
+      } else if (hostname.includes('twitch.tv')) {
+        // Twitch
+        const pathParts = urlObj.pathname.split('/').filter(Boolean);
+        return {
+          platform: 'twitch',
+          id: pathParts.length > 0 ? pathParts[0] : null
+        };
+      } 
+
+      return { platform: null, id: null };
+    } catch {
+      return { platform: null, id: null };
+    }
   };
 
   const getVideoInfo = async (url: string) => {
     try {
-      const youtubeId = extractYouTubeId(url);
-      if (youtubeId) {
-        const response = await fetch(
-          `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${youtubeId}&format=json`
-        );
-        const data = await response.json();
-        return data.title;
-      }
+      const { platform, id } = extractVideoInfo(url);
 
-      const vimeoPattern = /(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/;
-      const matchVimeo = url.match(vimeoPattern);
-      if (matchVimeo) {
-        const videoId = matchVimeo[1];
-        const response = await fetch(
-          `https://vimeo.com/api/v2/video/${videoId}.json`
-        );
-        const data = await response.json();
-        return data[0].title;
-      }
+      if (!id) return null;
 
-      return null;
+      switch (platform) {
+        case 'youtube':
+          const youtubeResponse = await fetch(
+            `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`
+          );
+          const youtubeData = await youtubeResponse.json();
+          return youtubeData.title;
+        
+        case 'dailymotion':
+          const dmResponse = await fetch(
+            `https://api.dailymotion.com/video/${id}?fields=title`
+          );
+          const dmData = await dmResponse.json();
+          return dmData.title;
+        
+        case 'twitch':
+          return `Twitch Stream: ${id}`;
+        
+        case 'vimeo':
+          const vimeoResponse = await fetch(
+            `https://vimeo.com/api/v2/video/${id}.json`
+          );
+          const vimeoData = await vimeoResponse.json();
+          return vimeoData[0].title;
+        
+        default:
+          return null;
+      }
     } catch (error) {
       console.error("Error fetching video title:", error);
       return null;
@@ -148,12 +189,15 @@ export default function ChatVideos({
     }
   }, [roomId, viewMode]);
 
+  const isVideoLink = (url: string) => {
+    const { platform, id } = extractVideoInfo(url);
+    return !!platform && !!id;
+  };
+
   const sendMessage = async () => {
     if (newMessage.trim() === "") return;
 
-    const isVideoLink = extractYouTubeId(newMessage) || newMessage.includes('vimeo.com');
-
-    if (isVideoLink) {
+    if (isVideoLink(newMessage)) {
       try {
         const isLectureEmpty = await checkLectureEmpty();
         
@@ -305,12 +349,13 @@ export default function ChatVideos({
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Écrivez un lien vidéo..."
+            placeholder="Écrivez un lien vidéo (YouTube, Dailymotion, Twitch)..."
             className="flex-grow dark:bg-gray-700 dark:text-white"
           />
           <Button 
             onClick={sendMessage} 
             className="flex items-center gap-2 bg-purple-500 hover:bg-purple-600 text-white"
+            disabled={!isVideoLink(newMessage)}
           >
             Envoyer
           </Button>

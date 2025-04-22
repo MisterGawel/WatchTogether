@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { db } from "../../../../firebase";
 import { doc, addDoc, deleteDoc, collection, onSnapshot, serverTimestamp } from "firebase/firestore";
-import YoutubePlayer from '../../../players/youtube-player';
+import WrapperPlayer from '../../../players/wrapper-player';
 
 export type CurrentVideo = {
   id: string;
@@ -60,12 +60,6 @@ export function useVideoPlayer(roomId: string | undefined) {
 
     return () => unsubscribe();
   }, [roomId]);
-
-  const extractYouTubeId = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return match && match[2].length === 11 ? match[2] : null;
-  };
 
   const handleStopVideo = async (video: CurrentVideo) => {
     if (!roomId) return;
@@ -127,37 +121,25 @@ export function useVideoPlayer(roomId: string | undefined) {
     currentVideo,
     pausedVideo,
     setPausedVideo,
-    extractYouTubeId,
     handleStopVideo,
     handleAdminVideoEnd
   };
 }
 
-export function YoutubePlayerWithEnd({ videoId, onEnd }: { videoId: string; onEnd?: () => void }) {
-  const playerRef = useRef<HTMLIFrameElement>(null);
+export function WrapperPlayerWithEnd({ link, onEnd }: { link: string; onEnd?: () => void }) {
+  const playerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== "https://www.youtube.com") return;
-      
-      try {
-        const data = JSON.parse(event.data);
-        if (data.event === "onStateChange" && data.info === 0) {
-          onEnd?.();
-        }
-      } catch (e) {
-        console.error("Error parsing YouTube message:", e);
-      }
+    const handleEnd = () => {
+      onEnd?.();
     };
 
-    window.addEventListener("message", handleMessage);
-
     return () => {
-      window.removeEventListener("message", handleMessage);
+      //
     };
   }, [onEnd]);
 
-  return <YoutubePlayer videoId={videoId} />;
+  return <WrapperPlayer link={link} />;
 }
 
 interface VideoPlayerProps {
@@ -183,24 +165,21 @@ export function VideoPlayer({
     lastVideoLink,
     currentVideo,
     pausedVideo,
-    extractYouTubeId,
     handleStopVideo,
     handleAdminVideoEnd
   } = useVideoPlayer(roomId);
 
   const urlToUse = lastVideoLink || videoUrl;
-  const youtubeIdFromCurrent = currentVideo ? extractYouTubeId(currentVideo.url) : null;
-  const youtubeIdFromUrl = urlToUse ? extractYouTubeId(urlToUse) : null;
 
   return (
     <div className="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
       <div className="w-full aspect-video bg-gray-200 dark:bg-gray-700 flex items-center justify-center relative">
         {currentVideo ? (
-          youtubeIdFromCurrent ? (
+          currentVideo.url ? (
             <>
               <div className="w-full h-full">
-                <YoutubePlayerWithEnd 
-                  videoId={youtubeIdFromCurrent}
+                <WrapperPlayerWithEnd 
+                  link={currentVideo.url}
                   onEnd={() => {
                     if (currentVideo.isAdminVideo) {
                       handleAdminVideoEnd();
@@ -224,7 +203,7 @@ export function VideoPlayer({
             <div className="p-4 text-center">
               <p className="text-lg font-medium text-gray-900 dark:text-white">URL vidéo non reconnue</p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                La vidéo en cours de lecture n'est pas une URL YouTube valide
+                La vidéo en cours de lecture n'est pas une URL valide
               </p>
             </div>
           )
@@ -235,18 +214,9 @@ export function VideoPlayer({
             </svg>
             <p className="mt-4 text-gray-600 dark:text-gray-400">Aucune vidéo en cours de lecture</p>
           </div>
-        ) : !youtubeIdFromUrl ? (
-          <div className="p-4 text-center">
-            <p className="text-lg font-medium text-gray-900 dark:text-white">URL vidéo non reconnue</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              {lastVideoLink 
-                ? "Le dernier lien dans wait_links n'est pas une URL YouTube valide"
-                : "Seules les URLs YouTube sont supportées"}
-            </p>
-          </div>
         ) : (
           <div className="w-full h-full">
-            <YoutubePlayer videoId={youtubeIdFromUrl} />
+            <WrapperPlayer link={urlToUse} />
           </div>
         )}
       </div>

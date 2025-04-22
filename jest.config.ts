@@ -8,7 +8,7 @@ const createJestConfig = nextJest({
 const config: Config = {
   coverageProvider: "v8",
   testEnvironment: "jsdom",
-  // Ajoutez cette ligne si vous utilisez des alias d'import
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'], 
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1'
   }
