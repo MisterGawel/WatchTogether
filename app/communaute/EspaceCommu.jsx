@@ -71,28 +71,25 @@ export default function CommunitySpace({Room}) {
 			const communityDocRef = doc(db, 'communities', CommuID);
 			const communityDocSnapshot = await getDoc(communityDocRef);
 			if (communityDocSnapshot.exists()) {
-				const currentAnnonces =
-					communityDocSnapshot.data().announcements;
+				const currentAnnonces =communityDocSnapshot.data().announcements;
 				if (index >= 0 && index < currentAnnonces.length) {
-					const updatedAnnonces = currentAnnonces.filter(
-						(_, idx) => idx !== index
-					);
+					const updatedAnnonces = currentAnnonces.filter((_, idx) => idx !== index);
 					await updateDoc(communityDocRef, {
 						announcements: updatedAnnonces,
 					});
 
 					setAnnonces(updatedAnnonces);
 				} else {
-					// console.log("Index d'annonce invalide !", index);
+					console.log("Index d'annonce invalide !", index);
 				}
 			} else {
-				// console.log("Le document de la communauté n'existe pas !");
+				 console.log("Le document de la communauté n'existe pas !");
 			}
 		} catch (error) {
-			// console.error(
-			// 	"Erreur lors de la suppression de l'annonce :",
-			// 	error
-			// );
+			console.error(
+				"Erreur lors de la suppression de l'annonce :",
+				error
+			);
 		}
 	};
 	/*AJOUT D'ANNONCE*/

@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { db } from '@/app/firebase';
+import { db,auth } from '@/app/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import {
 	collection,
 	getDocs,
 	addDoc,
+	doc,
+	updateDoc,
 } from 'firebase/firestore';
 import { Card } from '@heroui/react';
 import { Button } from '@heroui/button';
@@ -39,14 +42,29 @@ export default function CommunityListPage() {
 
 	const handleCreateCommunity = async () => {
 		if (!newName.trim()) return;
-
+	
+		const currentUser = auth.currentUser;
+		if (!currentUser) {
+			console.error('Aucun utilisateur connecté.');
+			return;
+		}
+	
 		try {
-			await addDoc(collection(db, 'communities'), {
+			// 1. Créer la communauté
+			const communityRef = await addDoc(collection(db, 'communities'), {
 				name: newName,
 				description: newDesc,
-				annonces:[],
+				annonces: [],
 				rooms: [],
 			});
+	
+			// 2. Ajouter l'utilisateur actuel comme admin dans son doc
+			const userRef = doc(db, 'users', currentUser.uid);
+			await updateDoc(userRef, {
+				[`communities.${communityRef.id}`]: 'admin',
+			});
+	
+			// 3. Reset form + rechargement
 			setNewName('');
 			setNewDesc('');
 			setShowForm(false);
