@@ -11,8 +11,8 @@ import {
 } from '@heroui/modal';
 import { Input } from '@heroui/input';
 import { Button } from '@heroui/button';
-import { addDoc, collection } from 'firebase/firestore';
-import { db } from '@/app/firebase';
+import { addDoc, collection,doc,updateDoc } from 'firebase/firestore';
+import { db ,auth} from '@/app/firebase';
 
 export default function CreateCommunity({
 	onCreated,
@@ -25,17 +25,32 @@ export default function CreateCommunity({
 
 	const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
-	const handleCreateCommunity = async () => {
+const handleCreateCommunity = async () => {
 		if (!name.trim()) return;
+
+		const currentUser = auth.currentUser;
+		if (!currentUser) {
+			console.error('Aucun utilisateur connecté.');
+			return;
+		}
 
 		setLoading(true);
 		try {
-			await addDoc(collection(db, 'communities'), {
+			// 1. Crée la communauté
+			const communityRef = await addDoc(collection(db, 'communities'), {
 				name,
 				description: desc,
 				annonces: [],
 				rooms: [],
 			});
+
+			// 2. Ajoute l'utilisateur en tant qu'admin dans son profil
+			const userRef = doc(db, 'users', currentUser.uid);
+			await updateDoc(userRef, {
+				[`communities.${communityRef.id}`]: 'admin',
+			});
+
+			// 3. Reset & callbacks
 			setName('');
 			setDesc('');
 			setLoading(false);
