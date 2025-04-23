@@ -61,6 +61,9 @@ export default function LoginPage() {
 						labelPlacement="outside"
 						name="email"
 						value={dataForm.email}
+						classNames={{
+							input: 'placeholder:text-sm',
+						}}
 						onChange={(e) =>
 							setDataForm({ ...dataForm, email: e.target.value })
 						}
@@ -74,6 +77,9 @@ export default function LoginPage() {
 						label="Mot de passe"
 						labelPlacement="outside"
 						name="password"
+						classNames={{
+							input: 'placeholder:text-sm',
+						}}
 						value={dataForm.password}
 						onChange={(e) =>
 							setDataForm({
@@ -89,7 +95,7 @@ export default function LoginPage() {
 					<Button
 						type="submit"
 						color="primary"
-						className="mx-auto mt-4 w-fit"
+						className="px-10 mx-auto mt-4 w-fit"
 						isLoading={loading}
 					>
 						Se connecter

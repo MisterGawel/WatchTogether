@@ -24,9 +24,9 @@ export default function Home() {
 	};
 
 	return (
-		<div className="flex flex-col min-h-screen bg-background">
+		<div className="flex flex-col min-h-screen">
 			{/* Navbar */}
-			<header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+			<header className="border-b backdrop-blur supports-[backdrop-filter]:bg-background/60">
 				<div className="container flex items-center justify-between h-16">
 					<Link href="/" className="flex items-center gap-2">
 						<motion.div
@@ -44,7 +44,7 @@ export default function Home() {
 							initial={{ opacity: 0, x: -10 }}
 							animate={{ opacity: 1, x: 0 }}
 							transition={{ delay: 0.2, duration: 0.5 }}
-							className="text-xl font-bold"
+							className="text-lg font-bold"
 						>
 							WatchToGamer
 						</motion.span>
@@ -52,34 +52,18 @@ export default function Home() {
 
 					{/* Desktop Navigation */}
 					<nav className="items-center hidden gap-6 md:flex">
-						<Link
-							href="#"
-							className="text-sm font-medium transition-colors hover:text-primary"
-						>
-							Comment ça marche
-						</Link>
-						<Link
-							href="#"
-							className="text-sm font-medium transition-colors hover:text-primary"
-						>
-							Fonctionnalités
-						</Link>
-						<Link
-							href="#"
-							className="text-sm font-medium transition-colors hover:text-primary"
-						>
-							À propos
-						</Link>
 						<div className="flex items-center gap-2">
 							<Button
 								variant="bordered"
 								size="sm"
+								className="border-primary text-primary"
 								onPress={() => router.push('/auth/login')}
 							>
 								Se connecter
 							</Button>
 							<Button
 								size="sm"
+								className="bg-primary text-primary-foreground"
 								onPress={() => router.push('/auth/register')}
 							>
 								S&apos;inscrire
@@ -109,33 +93,20 @@ export default function Home() {
 					className="overflow-hidden md:hidden"
 				>
 					<div className="container flex flex-col gap-4 py-4">
-						<Link
-							href="#"
-							className="text-sm font-medium transition-colors hover:text-primary"
-						>
-							Comment ça marche
-						</Link>
-						<Link
-							href="#"
-							className="text-sm font-medium transition-colors hover:text-primary"
-						>
-							Fonctionnalités
-						</Link>
-						<Link
-							href="#"
-							className="text-sm font-medium transition-colors hover:text-primary"
-						>
-							À propos
-						</Link>
 						<div className="flex flex-col gap-2">
 							<Button
 								variant="bordered"
+								color="primary"
 								size="sm"
-								className="w-full"
+								className="w-full border-primary text-primary-foreground"
 							>
 								Se connecter
 							</Button>
-							<Button size="sm" className="w-full">
+							<Button
+								color="primary"
+								size="sm"
+								className="w-full bg-primary text-primary-foreground"
+							>
 								S&apos;inscrire
 							</Button>
 						</div>
@@ -156,7 +127,7 @@ export default function Home() {
 							Regardez et jouez{' '}
 							<span className="text-primary">ensemble</span>
 						</h1>
-						<p className="text-xl text-muted-foreground">
+						<p className="text-xl text-popover-foreground">
 							Partagez vos jeux vidéo et vidéos en temps réel avec
 							vos amis. Synchronisez vos expériences et discutez
 							en direct.
@@ -176,24 +147,27 @@ export default function Home() {
 								<div className="flex-1">
 									<Input
 										type="text"
-										placeholder="Entrez un ID de room (optionnel)"
+										placeholder="Entrez un nom de room (ex: ma-room)"
 										value={roomId}
 										onChange={(e) =>
 											setRoomId(e.target.value)
 										}
+										classNames={{
+											inputWrapper: '!rounded-lg',
+										}}
 										className="h-12"
 									/>
 								</div>
 								<Button
 									type="submit"
 									size="lg"
-									className="h-10 gap-2 rounded-lg"
+									className="h-10 gap-2 rounded-lg bg-primary text-primary-foreground"
 								>
 									Créer une room
 									<ArrowRight className="w-4 h-4" />
 								</Button>
 							</form>
-							<p className="mt-2 text-sm text-muted-foreground">
+							<p className="mt-2 text-sm text-popover-foreground">
 								Aucun compte requis. Créez une room et invitez
 								vos amis en partageant le lien.
 							</p>
@@ -234,16 +208,12 @@ export default function Home() {
 			<footer className="py-6 border-t md:py-8">
 				<div className="container flex flex-col items-center justify-between gap-4 sm:flex-row">
 					<div className="flex items-center gap-2">
-						<div className="flex items-center justify-center rounded-full size-6 bg-primary">
-							<span className="text-xs font-bold text-primary-foreground">
-								W
-							</span>
-						</div>
-						<span className="text-sm font-medium">
-							WatchToGamer
+						<span className="text-sm font-medium opacity-70">
+							Réalisé par A. Gaël & L. Alexis & R. Lucas & R.
+							Nicolas
 						</span>
 					</div>
-					<p className="text-sm text-muted-foreground">
+					<p className="text-sm text-popover-foreground opacity-70">
 						© {new Date().getFullYear()} WatchToGamer. Tous droits
 						réservés.
 					</p>

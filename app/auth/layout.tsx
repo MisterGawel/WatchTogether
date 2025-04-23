@@ -1,14 +1,14 @@
 'use client';
 import Image from 'next/image';
 import watchtogether from '@/public/watch-together.jpg';
-import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function AuthLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const router = useRouter();
 	return (
 		<div className="flex w-full h-full">
 			<div className="w-3/5 h-screen bg-blue-100">
@@ -18,18 +18,23 @@ export default function AuthLayout({
 					className="object-cover w-full h-full"
 				/>
 			</div>
-			<div className="grid w-2/5 h-screen bg-white grid-rows-[auto_1fr_auto] items-center text-center">
-				<h1
-					className="pt-16 text-xl font-bold text-blue-700 cursor-pointer hover:opacity-70"
-					onClick={() => router.push('/')}
-				>
-					WatchToGamer
-				</h1>
+			<div className="relative flex items-center w-2/5 h-screen text-center bg-white">
+				<div className="absolute left-0 flex items-center justify-center w-full h-16 bg-white top-8">
+					<Link href="/" className="flex items-center gap-2 ">
+						<motion.div
+							initial={{ rotate: -10, scale: 0.9 }}
+							animate={{ rotate: 0, scale: 1 }}
+							transition={{ duration: 0.5 }}
+						>
+							<div className="flex items-center justify-center rounded-full size-8 bg-primary">
+								<span className="font-bold text-primary-foreground">
+									W
+								</span>
+							</div>
+						</motion.div>
+					</Link>
+				</div>
 				{children}
-				<h1 className="pb-16 text-xs font-normal text-gray-400">
-					Réalisé par <br /> A. Gaël & L. Alexis & R. Lucas & R.
-					Nicolas
-				</h1>
 			</div>
 		</div>
 	);
