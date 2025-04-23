@@ -71,9 +71,12 @@ export default function CommunitySpace({ Room }) {
 			const communityDocRef = doc(db, 'communities', CommuID);
 			const communityDocSnapshot = await getDoc(communityDocRef);
 			if (communityDocSnapshot.exists()) {
-				const currentAnnonces =communityDocSnapshot.data().announcements;
+				const currentAnnonces =
+					communityDocSnapshot.data().announcements;
 				if (index >= 0 && index < currentAnnonces.length) {
-					const updatedAnnonces = currentAnnonces.filter((_, idx) => idx !== index);
+					const updatedAnnonces = currentAnnonces.filter(
+						(_, idx) => idx !== index
+					);
 					await updateDoc(communityDocRef, {
 						announcements: updatedAnnonces,
 					});
@@ -83,7 +86,7 @@ export default function CommunitySpace({ Room }) {
 					console.log("Index d'annonce invalide !", index);
 				}
 			} else {
-				 console.log("Le document de la communauté n'existe pas !");
+				console.log("Le document de la communauté n'existe pas !");
 			}
 		} catch (error) {
 			console.error(
@@ -245,6 +248,16 @@ export default function CommunitySpace({ Room }) {
 	return (
 		<div className="flex flex-col min-h-screen">
 			{/* En-tête avec le nom de la communauté */}
+
+			<div className="flex justify-between gap-8">
+				<Card className="w-1/2">
+					<CardHeader>{nomCommu}</CardHeader>
+				</Card>
+				<Card className="w-1/2">
+					<CardHeader>{nomCommu}</CardHeader>
+				</Card>
+			</div>
+
 			<header className="py-4 text-2xl font-bold text-center text-black bg-gray-400 shadow-md">
 				{nomCommu}
 			</header>
