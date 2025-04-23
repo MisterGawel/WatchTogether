@@ -39,7 +39,7 @@ export default function RegisterPage() {
 			await setDoc(doc(db, 'users', user.uid), {
 				email: user.email,
 				name: dataForm.name,
-				communities: [],
+				communities: {},
 				rooms: [],
 			});
 		} catch (error) {
