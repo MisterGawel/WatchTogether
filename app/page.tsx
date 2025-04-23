@@ -26,7 +26,7 @@ export default function Home() {
 	return (
 		<div className="flex flex-col min-h-screen">
 			{/* Navbar */}
-			<header className="border-b backdrop-blur supports-[backdrop-filter]:bg-background/60">
+			<header className="border-b backdrop-blur supports-[backdrop-filter]:bg-background/60 w-full flex justify-center">
 				<div className="container flex items-center justify-between h-16">
 					<Link href="/" className="flex items-center gap-2">
 						<motion.div
@@ -115,7 +115,7 @@ export default function Home() {
 			</header>
 
 			{/* Hero Section */}
-			<section className="container flex-1 py-12 md:py-24 lg:py-32">
+			<section className="container flex-1 w-full py-12 mx-auto md:py-24 lg:py-32">
 				<div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
@@ -205,8 +205,8 @@ export default function Home() {
 			</section>
 
 			{/* Footer */}
-			<footer className="py-6 border-t md:py-8">
-				<div className="container flex flex-col items-center justify-between gap-4 sm:flex-row">
+			<footer className="min-w-full py-6 border-t md:py-8">
+				<div className="!container flex flex-col items-center mx-auto justify-between  gap-4 sm:flex-row">
 					<div className="flex items-center gap-2">
 						<span className="text-sm font-medium opacity-70">
 							Réalisé par A. Gaël & L. Alexis & R. Lucas & R.

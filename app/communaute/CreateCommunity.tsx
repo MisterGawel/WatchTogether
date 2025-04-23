@@ -11,8 +11,8 @@ import {
 } from '@heroui/modal';
 import { Input } from '@heroui/input';
 import { Button } from '@heroui/button';
-import { addDoc, collection,doc,updateDoc } from 'firebase/firestore';
-import { db ,auth} from '@/app/firebase';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
+import { db, auth } from '@/app/firebase';
 
 export default function CreateCommunity({
 	onCreated,
@@ -25,7 +25,7 @@ export default function CreateCommunity({
 
 	const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
-const handleCreateCommunity = async () => {
+	const handleCreateCommunity = async () => {
 		if (!name.trim()) return;
 
 		const currentUser = auth.currentUser;

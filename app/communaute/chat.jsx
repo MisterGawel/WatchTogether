@@ -13,7 +13,7 @@ import {
 import { Card } from '@heroui/react';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
-import { db,auth } from '@/app/firebase';
+import { db, auth } from '@/app/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 export default function ChatCommu({ Role, roomId }) {
 	const [messages, setMessages] = useState([]);
@@ -36,29 +36,27 @@ export default function ChatCommu({ Role, roomId }) {
 		return () => unsubscribe(); // Nettoie l'écouteur quand le composant est démonté
 	}, [roomId]);
 
-	
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-		  if (currentUser) {
-			// Récupère le document utilisateur dans Firestore en utilisant l'UID
-			const docRef = doc(db, 'users', currentUser.uid);
-			const docSnap = await getDoc(docRef);
-	
-			if (docSnap.exists()) {
-			  const data = docSnap.data();
-			  setUserName(data.name);
+			if (currentUser) {
+				// Récupère le document utilisateur dans Firestore en utilisant l'UID
+				const docRef = doc(db, 'users', currentUser.uid);
+				const docSnap = await getDoc(docRef);
+
+				if (docSnap.exists()) {
+					const data = docSnap.data();
+					setUserName(data.name);
+				} else {
+					console.log('Aucun utilisateur trouvé pour cet UID.');
+				}
 			} else {
-			  console.log("Aucun utilisateur trouvé pour cet UID.");
+				setUserName('');
 			}
-		  } else {
-			setUserName('');
-		  }
 		});
-	
+
 		// Nettoyage de l'écouteur d'état d'authentification lors du démontage du composant
 		return () => unsubscribe();
-	  }, []);
-
+	}, []);
 
 	const sendMessage = async () => {
 		if (newMessage.trim() !== '') {
