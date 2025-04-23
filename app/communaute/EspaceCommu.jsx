@@ -18,7 +18,7 @@ import CardRoom from './CardRoom';
 import CardAnnonce from './CardAnnonces';
 import InputAnnonce from './inputAnnonce';
 import InputRoom from './InputRoom';
-export default function CommunitySpace({Room}) {
+export default function CommunitySpace({ Room }) {
 	const CommuID = Room;
 	const [rooms, setRoom] = useState([]);
 	const [nomCommu, setNomCommu] = useState('');
@@ -26,7 +26,7 @@ export default function CommunitySpace({Room}) {
 	const [newAnnonce, setNewAnnonce] = useState('');
 	const [newRoomName, setNewRoomName] = useState('');
 	const [user, setUser] = useState(null);
-	const [communities, setCommunities] = useState({});//Communaute du user
+	const [communities, setCommunities] = useState({}); //Communaute du user
 	// Fonction pour ajouter une salle à Firestore et à l'état local
 	const addRoom = async () => {
 		const newRoomId = Date.now().toString();
@@ -205,8 +205,8 @@ export default function CommunitySpace({Room}) {
 			}
 		} catch (error) {
 			// console.error(
-				// 'Erreur lors de la récupération des données :',
-				// error
+			// 'Erreur lors de la récupération des données :',
+			// error
 			// );
 		}
 	};
@@ -214,10 +214,10 @@ export default function CommunitySpace({Room}) {
 		const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
 			if (currentUser) {
 				setUser(currentUser);
-	
+
 				const docRef = doc(db, 'users', currentUser.uid);
 				const docSnap = await getDoc(docRef);
-	
+
 				if (docSnap.exists()) {
 					const data = docSnap.data();
 					setCommunities(data.communities || {});
@@ -227,26 +227,23 @@ export default function CommunitySpace({Room}) {
 				setCommunities({});
 			}
 		});
-	
+
 		return () => unsubscribe();
 	}, []);
 	useEffect(() => {
 		DonnéesBase();
 	}, []); // Exécuter une seule fois au chargement
 
-
-
-
-	const isAdmin = (communityId)  => {
+	const isAdmin = (communityId) => {
 		return communities[communityId] === 'admin';
 	};
 	console.log('user : ', user);
-	let role ='member'
-	if (isAdmin(CommuID)){
+	let role = 'member';
+	if (isAdmin(CommuID)) {
 		role = 'admin';
 	}
 	return (
-		<div className="flex flex-col min-h-screen bg-gray-100">
+		<div className="flex flex-col min-h-screen">
 			{/* En-tête avec le nom de la communauté */}
 			<header className="py-4 text-2xl font-bold text-center text-black bg-gray-400 shadow-md">
 				{nomCommu}
