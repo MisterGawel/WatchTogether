@@ -9,6 +9,7 @@ import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { createRoom } from './rooms/new/roomService';
 
 export default function Home() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,11 +18,19 @@ export default function Home() {
 
 	const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-	const handleCreateRoom = (e: React.FormEvent) => {
+	const handleCreateRoom = async (e: React.FormEvent) => {
 		e.preventDefault();
-		// Ici, vous pourriez ajouter la logique pour créer une room
-		alert(`Room créée avec l'ID: ${roomId || 'généré automatiquement'}`);
+	
+		try {
+			const createdRoomId = await createRoom(roomId, "", "");
+			alert(`Room créée avec l'ID: ${createdRoomId || 'généré automatiquement'}`);
+			router.push(`/rooms/new/${createdRoomId}`);
+		} catch (error) {
+			console.error("Erreur lors de la création de la room:", error);
+			alert("Une erreur est survenue lors de la création de la room");
+		}
 	};
+	
 
 	return (
 		<div className="flex flex-col min-h-screen">
