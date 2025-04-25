@@ -167,7 +167,7 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
 						<div className="h-full bg-white rounded-lg shadow-lg dark:bg-gray-800">
 							<ChatRoom
 								roomId={resolvedParams.id}
-								currentUser={currentUser?.name || 'anonymous'}
+								currentUser={currentUser?.displayName  || 'anonymous'}
 								initialMessages={[]}
 								Role={isAdmin ? 'admin' : 'user'}
 							/>
@@ -180,7 +180,7 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
 						<div className="h-full bg-white rounded-lg shadow-lg dark:bg-gray-800">
 							<ChatVideos
 								roomId={resolvedParams.id}
-								currentUser={currentUser?.uid || 'anonymous'}
+								currentUser={currentUser?.displayName  || 'anonymous'}
 								initialMessages={[]}
 								Role={isAdmin ? 'admin' : 'user'}
 							/>
