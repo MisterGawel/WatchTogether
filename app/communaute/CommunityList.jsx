@@ -5,7 +5,7 @@ import { Card } from '@heroui/react';
 import { Button } from '@heroui/button';
 import { motion } from 'framer-motion';
 import { db,auth } from '../firebase';
-import { collection, getDocs,doc ,getDoc} from 'firebase/firestore';
+import { collection, getDocs,doc ,getDoc,updateDoc} from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth'; // Pour vérifier l'utilisateur connect
 import CommunitySpace from './EspaceCommu';
 import CreateCommunity from './CreateCommunity';
@@ -62,6 +62,27 @@ export default function CommunityListPage() {
 		setLoading(false);
 		
 	};
+
+
+	  // Fonction pour rejoindre une communauté
+	  const joinCommunity = async (communityId) => {
+		if (user) {
+		  // Ajouter l'utilisateur à la communauté
+		  const userRef = doc(db, 'users', user.uid);
+		  await updateDoc(userRef, {
+			[`communities.${communityId}`]: 'member', // Assigner un rôle de membre à l'utilisateur pour cette communauté
+		  });
+	
+		  // Mettre à jour l'état des communautés de l'utilisateur
+		  setUserCommunities((prevCommunities) => ({
+			...prevCommunities,
+			[communityId]: 'member',
+		  }));
+		  setSelectedCommunityId(communityId)
+		  // Recharger les communautés
+		  fetchCommunities();
+		}
+	  };
 	if (selectedCommunityId) {
 		return (
 			<div className="p-4">
@@ -133,7 +154,7 @@ export default function CommunityListPage() {
 							  duration: 0.3,
 							  ease: 'easeOut',
 							}}
-							onClick={() => setSelectedCommunityId(commu.id)}
+							onClick={() => joinCommunity(commu.id)}
 						  >
 							<Card className="p-6 transition-all duration-300 border border-gray-200 shadow-sm cursor-pointer min-h-32 rounded-2xl hover:shadow-lg hover:border-gray-300">
 							  <h2 className="text-2xl font-semibold text-primary">{commu.name}</h2>
