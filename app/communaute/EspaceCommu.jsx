@@ -1,18 +1,19 @@
 'use client';
 import { useState, useEffect } from 'react';
 import ChatCommu from './chat';
-import { Card, CardHeader, CardBody, Image } from '@heroui/react';
+import { Card, CardHeader,Link} from '@heroui/react';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import { db, auth } from '@/app/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
+	onSnapshot,
 	getDoc,
-	collection,
+
 	doc,
 	updateDoc,
 	deleteDoc,
-	setDoc,
+
 } from 'firebase/firestore';
 import CardRoom from './CardRoom';
 import CardAnnonce from './CardAnnonces';
@@ -24,47 +25,10 @@ export default function CommunitySpace({ Room }) {
 	const [nomCommu, setNomCommu] = useState('');
 	const [annonces, setAnnonces] = useState([]);
 	const [newAnnonce, setNewAnnonce] = useState('');
-	const [newRoomName, setNewRoomName] = useState('');
 	const [user, setUser] = useState(null);
 	const [communities, setCommunities] = useState({}); //Communaute du user
-	// Fonction pour ajouter une salle à Firestore et à l'état local
-	const addRoom = async () => {
-		const newRoomId = Date.now().toString();
-		if (newRoomName.trim() !== '') {
-			try {
-				const newRoom = {
-					name: newRoomName,
-					member: {},
-					id: newRoomId,
-					communityID: CommuID,
-				};
-				await setDoc(doc(db, 'rooms', newRoomId), newRoom);
-				const communityRef = doc(db, 'communities', CommuID);
-				const communityDocSnapshot = await getDoc(communityRef);
-				if (communityDocSnapshot.exists()) {
-					const currentRooms =
-						communityDocSnapshot.data().rooms || [];
-					const updatedRooms = [...currentRooms, newRoomId];
-					// Mise à jour Firestore
-					await updateDoc(communityRef, { rooms: updatedRooms });
-					// Mettre à jour l'état local
-					setRoom((prevRooms) => [
-						...prevRooms,
-						{ id: newRoomId, name: newRoomName, member: {} },
-					]);
-					// console.log('Salle ajoutée avec succès !');
-				} else {
-					// console.log("Le document de la communauté n'existe pas !");
-				}
-				// Réinitialiser les champs
-				setNewRoomName('');
-			} catch (error) {
-				// console.error("Erreur lors de l'ajout de la salle :", error);
-			}
-		} else {
-			// console.log('Tous les champs doivent être remplis !');
-		}
-	};
+
+	
 	/*Suppression d'annonces */
 	const deleteAnnonce = async (index) => {
 		try {
@@ -165,52 +129,36 @@ export default function CommunitySpace({ Room }) {
 	const DonnéesBase = async () => {
 		try {
 			const communitiesRef = doc(db, 'communities', CommuID);
-			const communityDocSnapshot = await getDoc(communitiesRef);
-			const name = communityDocSnapshot.data().name;
-			setNomCommu(name); // Mettre à jour l'état avec le nom de la communauté
-
-			if (communityDocSnapshot.exists()) {
-				const roomsId = communityDocSnapshot.data().rooms;
-				const roomPromises = roomsId.map(async (roomId) => {
-					const roomRef = doc(db, 'rooms', roomId);
-					const roomSnapshot = await getDoc(roomRef);
-					if (!roomSnapshot.exists()) {
-						// console.log(
-						// 	`La room avec ID ${roomId} n'existe pas dans Firestore.`
-						// );
-					} else {
-						// console.log(` Room trouvée :`, roomSnapshot.data());
-					}
-					return roomSnapshot.exists()
-						? { id: roomId, ...roomSnapshot.data() }
-						: null;
-				});
-				const rooms = (await Promise.all(roomPromises)).filter(
-					(room) => room !== null
-				); // Supprimer les null
-				console.log(rooms);
-				setRoom(rooms);
-				// Récupérer les annonces depuis le champ 'announcements'
-				const announcements = communityDocSnapshot.data().announcements;
-				// changement possible pour pouvoir récupére des données des rooms
-
-				if (Array.isArray(announcements)) {
-					console.log(announcements);
-
-					setAnnonces(announcements); // Mettre à jour l'état avec les annonces récupérées
+	
+			// ON ECOUTE en direct
+			onSnapshot(communitiesRef, async (communityDocSnapshot) => {
+				if (communityDocSnapshot.exists()) {
+					const data = communityDocSnapshot.data();
+	
+					setNomCommu(data.name);
+	
+					const roomsId = data.rooms || [];
+	
+					// Charge les rooms
+					const roomPromises = roomsId.map(async (roomId) => {
+						const roomRef = doc(db, 'rooms', roomId);
+						const roomSnapshot = await getDoc(roomRef);
+						return roomSnapshot.exists()
+							? { id: roomId, ...roomSnapshot.data() }
+							: null;
+					});
+					const rooms = (await Promise.all(roomPromises)).filter((room) => room !== null);
+					setRoom(rooms);
+	
+					// Charge les annonces
+					const announcements = data.announcements || [];
+					setAnnonces(announcements);
 				} else {
-					// console.log(
-					// 	"Le champ 'announcements ou rooms' n'est pas un tableau."
-					// );
+					console.log("Le document de la communauté n'existe pas !");
 				}
-			} else {
-				// console.log("Le document de la communauté n'existe pas !");
-			}
+			});
 		} catch (error) {
-			// console.error(
-			// 'Erreur lors de la récupération des données :',
-			// error
-			// );
+			console.error("Erreur lors de la récupération des données :", error);
 		}
 	};
 	useEffect(() => {
@@ -240,7 +188,7 @@ export default function CommunitySpace({ Room }) {
 	const isAdmin = (communityId) => {
 		return communities[communityId] === 'admin';
 	};
-	console.log('user : ', user);
+	// console.log('user : ', user);
 	let role = 'member';
 	if (isAdmin(CommuID)) {
 		role = 'admin';
@@ -284,20 +232,19 @@ export default function CommunitySpace({ Room }) {
 					{/* Section Salle (Événements, Infos, etc.) */}
 					<h2 className="mt-6 mb-4 text-xl font-bold">Salles</h2>
 					<InputRoom
-						ValeurChamp={newRoomName}
 						role={role}
-						foncNewAnnonce={(e) => setNewRoomName(e.target.value)}
-						foncaddAnnonce={addRoom}
+						commuID={CommuID}
 					></InputRoom>
 					{/* Affichage des cartes*/}
-					<div className="grid grid-cols-3 gap-4">
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 						{rooms.map((room) => (
 							<CardRoom
 								key={room.id}
+								id={room.id}
 								room={room.name}
 								role={role}
 								Suppresion={() => deleteRoom(room.id)}
-							></CardRoom>
+							/>
 						))}
 					</div>
 				</div>

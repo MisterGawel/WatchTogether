@@ -4,12 +4,12 @@ import { useRouter } from 'next/navigation';
 import { createRoom } from '../rooms/new/roomService';
 import { Card, Button, Input } from '@heroui/react';
 
-export default function InputRoom({ role }) {
+export default function InputRoom({ role ,commuID}) {
 	const [roomName, setRoomName] = useState('');
 	const router = useRouter();
 
-	const communityID = 'UIyd1HlGNJACSPUNP2pl';
-	const idAdmin = '2';
+	const communityID = commuID;
+	const idAdmin = '2';//je sais ce que c'est
 
 	const handleSubmit = async () => {
 		if (!roomName.trim()) {
@@ -19,7 +19,7 @@ export default function InputRoom({ role }) {
 
 		try {
 			const roomId = await createRoom(roomName, communityID, idAdmin);
-			router.push(`/rooms/new/${roomId}`);
+			//router.push(`/rooms/new/${roomId}`);
 		} catch (error) {
 			console.error('Erreur création room:', error);
 			alert('Erreur lors de la création de la salle');
