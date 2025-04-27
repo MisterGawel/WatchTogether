@@ -4,25 +4,25 @@
 
 /* Définition des variables CSS */
 :root {
-	--border: 225 100% 85%;
-	--input: 220 100% 93%;
-	--ring: 220 100% 70%;
-	--background: 217 39% 33%; /* Bleu très clair */
-	--foreground: 223 76% 15%;
-	--primary: 220 100% 55%; /* Bleu intense */
+	--border: 0 0% 90%;
+	--input: 0 0% 96%;
+	--ring: 0 0% 80%;
+	--background: 0 0% 98%;
+	--foreground: 210 20% 20%;
+	--primary: 210 100% 50%;
 	--primary-foreground: 0 0% 100%;
-	--secondary: 210 100% 80%; /* Bleu pastel */
-	--secondary-foreground: 0 0% 0%;
-	--destructive: 0 72% 50%;
+	--secondary: 210 100% 50%;
+	--secondary-foreground: 0 0% 100%;
+	--destructive: 0 100% 50%;
 	--destructive-foreground: 0 0% 100%;
-	--muted: 220 100% 89%;
-	--muted-foreground: 0 0% 100%;
-	--accent: 210 100% 70%; /* Bleu clair */
-	--accent-foreground: 0 0% 100%;
-	--popover: 220 100% 96%;
-	--popover-foreground: 0 0% 0%;
-	--card: 220 100% 95%;
-	--card-foreground: 0 0% 0%;
+	--muted: 210 10% 95%;
+	--muted-foreground: 210 20% 20%;
+	--accent: 160 97% 40%;
+	--accent-foreground: var(--foreground);
+	--popover: var(--background);
+	--popover-foreground: var(--foreground);
+	--card: var(--background);
+	--card-foreground: var(--foreground);
 	--radius: 0.5rem;
 }
 
