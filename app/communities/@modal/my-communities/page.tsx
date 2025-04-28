@@ -2,39 +2,33 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card } from '@heroui/react';
-import { Button } from '@heroui/button';
 import { motion } from 'framer-motion';
 import { db, auth } from '@/app/firebase';
-import {
-	collection,
-	getDocs,
-	doc,
-	getDoc,
-	updateDoc,
-} from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
 	Modal,
 	ModalContent,
 	ModalHeader,
-	ModalFooter,
 	useDisclosure,
 	ModalBody,
 } from '@heroui/modal';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function AllCommunitiesModal() {
-	const [communities, setCommunities] = useState([]);
 	const [loading, setLoading] = useState(false);
-	const [selectedCommunityId, setSelectedCommunityId] = useState(null);
-	const [user, setUser] = useState(null); // L'utilisateur connecté
-	const [userCommunities, setUserCommunities] = useState({});
+	const [communities, setCommunities] = useState<
+		{ id: string; name?: string; description?: string }[]
+	>([]);
+	const [userCommunities, setUserCommunities] = useState<
+		Record<string, string>
+	>({});
 	const router = useRouter();
 	const { onOpenChange } = useDisclosure();
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
 			if (currentUser) {
-				setUser(currentUser);
 				const userRef = doc(db, 'users', currentUser.uid);
 				getDoc(userRef).then((docSnap) => {
 					if (docSnap.exists()) {
@@ -42,72 +36,76 @@ export default function AllCommunitiesModal() {
 					}
 				});
 			} else {
-				setUser(null);
 				setUserCommunities({});
 			}
 		});
 		return () => unsubscribe();
 	}, []);
+
 	useEffect(() => {
 		fetchCommunities();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [userCommunities]);
 
 	const fetchCommunities = async () => {
-		console.log('User communauté : ', userCommunities);
 		setLoading(true);
 		const querySnapshot = await getDocs(collection(db, 'communities'));
 		const communities = querySnapshot.docs.map((doc) => ({
 			id: doc.id,
 			...doc.data(),
 		}));
-		// Séparer les communautés de l'utilisateur et les autres
+
 		const userCommunitiesList = communities.filter(
 			(commu) => userCommunities[commu.id]
 		);
-		const otherCommunitiesList = communities.filter(
-			(commu) => !userCommunities[commu.id]
-		);
 
-		setCommunities({
-			userCommunities: userCommunitiesList,
-			otherCommunities: otherCommunitiesList,
-		});
-		setLoading(false);
+		setCommunities(userCommunitiesList);
 		setLoading(false);
 	};
 
-	// Fonction pour rejoindre une communauté
-	const joinCommunity = async (communityId) => {
-		if (user) {
-			// Ajouter l'utilisateur à la communauté
-			const userRef = doc(db, 'users', user.uid);
-			await updateDoc(userRef, {
-				[`communities.${communityId}`]: 'member', // Assigner un rôle de membre à l'utilisateur pour cette communauté
-			});
-
-			// Mettre à jour l'état des communautés de l'utilisateur
-			setUserCommunities((prevCommunities) => ({
-				...prevCommunities,
-				[communityId]: 'member',
-			}));
-			setSelectedCommunityId(communityId);
-			// Recharger les communautés
-			fetchCommunities();
-		}
-	};
-	return (
-		<>
+	if (loading) {
+		return (
 			<Modal defaultOpen={true} size="5xl" onOpenChange={onOpenChange}>
 				<ModalContent>
-					{(onClose) => (
+					{() => (
 						<>
 							<ModalHeader>Mes communautés</ModalHeader>
-							<ModalBody className="max-h-[80vh] py-[2rem] overflow-y-auto">
-								{communities.userCommunities &&
-									communities.userCommunities.length > 0 && (
+							<ModalBody className="flex items-center justify-center max-h-[80vh] min-h-[80vh]">
+								<div className="flex flex-col items-center space-y-2">
+									<Loader2
+										className="w-8 h-8 animate-spin"
+										aria-hidden="true"
+									/>
+									<span className="text-gray-500">
+										Chargement des communautés…
+									</span>
+									<span className="sr-only">
+										Chargement en cours
+									</span>
+								</div>
+							</ModalBody>
+						</>
+					)}
+				</ModalContent>
+			</Modal>
+		);
+	} else
+		return (
+			<>
+				<Modal
+					defaultOpen={true}
+					size="5xl"
+					onOpenChange={onOpenChange}
+				>
+					<ModalContent>
+						{() => (
+							<>
+								<ModalHeader>Mes communautés</ModalHeader>
+								<ModalBody className="max-h-[80vh] min-h-[80vh] py-[2rem] overflow-y-auto">
+									{communities && communities.length > 0 && (
 										<div className="mb-8">
 											<div className="grid gap-6 mx-auto md:grid-cols-2 lg:grid-cols-3 max-w-7xl">
-												{communities.userCommunities.map(
+												{communities.map(
 													(commu, index) => (
 														<motion.div
 															key={commu.id}
@@ -148,23 +146,11 @@ export default function AllCommunitiesModal() {
 											</div>
 										</div>
 									)}
-							</ModalBody>
-							<ModalFooter>
-								<Button
-									color="danger"
-									variant="light"
-									onPress={onClose}
-								>
-									Annuler
-								</Button>
-								<Button color="primary" isLoading={loading}>
-									Créer
-								</Button>
-							</ModalFooter>
-						</>
-					)}
-				</ModalContent>
-			</Modal>
-		</>
-	);
+								</ModalBody>
+							</>
+						)}
+					</ModalContent>
+				</Modal>
+			</>
+		);
 }

@@ -7,6 +7,8 @@ import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { CommunityDashboard } from './CommunityDashboard';
 import type { User } from 'firebase/auth';
+import { Button } from '@heroui/button';
+import Link from 'next/link';
 
 type Community = {
 	id: string;
@@ -65,7 +67,16 @@ export default function CommunityListPage() {
 	};
 
 	return (
-		<div className="flex items-center justify-center min-h-screen px-4 py-10 bg-gray-50">
+		<div className="flex items-center justify-center min-h-screen px-4 py-10 bg-background">
+			<Button
+				className="absolute top-4 left-4"
+				color="primary"
+				size="sm"
+				href="/"
+				as={Link}
+			>
+				Retour à l&apos;accueil
+			</Button>
 			<CommunityDashboard
 				user={user}
 				totalCount={
