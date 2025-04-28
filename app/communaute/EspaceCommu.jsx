@@ -9,7 +9,6 @@ import { onAuthStateChanged } from 'firebase/auth';
 import {
 	onSnapshot,
 	getDoc,
-
 	doc,
 	updateDoc,
 	deleteDoc,
@@ -19,14 +18,17 @@ import CardRoom from './CardRoom';
 import CardAnnonce from './CardAnnonces';
 import InputAnnonce from './inputAnnonce';
 import InputRoom from './InputRoom';
+import getUsersInCommunity from './AfficherMembre'
+import CommunityMembers from './AfficherMembre';
 export default function CommunitySpace({ Room }) {
 	const CommuID = Room;
+	const Members = getUsersInCommunity(CommuID);
 	const [rooms, setRoom] = useState([]);
 	const [nomCommu, setNomCommu] = useState('');
 	const [annonces, setAnnonces] = useState([]);
 	const [newAnnonce, setNewAnnonce] = useState('');
 	const [user, setUser] = useState(null);
-	const [communities, setCommunities] = useState({}); //Communaute du user
+	const [communities, setCommunities] = useState({}); //Communaute du user verification admin
 
 	
 	/*Suppression d'annonces */
@@ -183,7 +185,7 @@ export default function CommunitySpace({ Room }) {
 	}, []);
 	useEffect(() => {
 		DonnéesBase();
-	}, []); // Exécuter une seule fois au chargement
+	}, []); 
 
 	const isAdmin = (communityId) => {
 		return communities[communityId] === 'admin';
@@ -247,6 +249,7 @@ export default function CommunitySpace({ Room }) {
 							/>
 						))}
 					</div>
+					<CommunityMembers communityId={CommuID} Role={role}></CommunityMembers>
 				</div>
 				{/* Section Chat */}
 				<div className="flex-1 p-4 bg-grey-100">
