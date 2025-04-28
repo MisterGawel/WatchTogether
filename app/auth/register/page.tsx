@@ -6,7 +6,6 @@ import { auth, db } from '@/app/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ValidationError } from 'next/dist/compiled/amphtml-validator';
 import { doc, setDoc } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
 
 interface FormData {
 	name: string;
@@ -27,6 +26,10 @@ export default function RegisterPage() {
 
 	const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		if (dataForm.password !== dataForm.confirmPassword) {
+			setErrorMessage('Les mots de passe ne correspondent pas');
+			return;
+		}
 
 		try {
 			const { user } = await createUserWithEmailAndPassword(
@@ -58,6 +61,9 @@ export default function RegisterPage() {
 					onSubmit={onSubmit}
 					validationErrors={errorMessage}
 				>
+					<p className="mx-auto mb-6 text-sm text-red-500">
+						{errorMessage}
+					</p>
 					<Input
 						isRequired
 						errorMessage="Entrer un nom valide"
@@ -110,11 +116,6 @@ export default function RegisterPage() {
 							})
 						}
 						size="lg"
-						validate={(value) => {
-							if (value !== dataForm.confirmPassword)
-								return 'Les mots de passe ne correspondent pas';
-							return true;
-						}}
 						className="pt-4"
 						placeholder="Entrez votre mot de passe"
 						type="password"

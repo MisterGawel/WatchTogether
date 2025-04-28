@@ -1,12 +1,11 @@
 import type React from 'react';
 import './styles/globals.css';
 import ThemeProvider from './providers';
-import { Inter } from 'next/font/google';
+import { Roboto } from 'next/font/google';
 import type { Metadata } from 'next';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/app/firebase';
+import '@theme-toggles/react/css/Classic.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const roboto = Roboto({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
 	title: 'WatchToGamer - Regardez et jouez ensemble',
@@ -19,17 +18,9 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	onAuthStateChanged(auth, (user) => {
-		if (user) {
-			console.log('Utilisateur détecté au chargement :', user);
-		} else {
-			console.log('Aucun utilisateur détecté après refresh.');
-		}
-	});
-
 	return (
 		<html lang="fr" suppressHydrationWarning>
-			<body className={inter.className}>
+			<body className={roboto.className}>
 				<ThemeProvider>{children}</ThemeProvider>
 			</body>
 		</html>

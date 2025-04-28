@@ -11,15 +11,15 @@ export default function AuthLayout({
 }>) {
 	return (
 		<div className="flex w-full h-full">
-			<div className="w-3/5 h-screen bg-blue-100">
+			<div className="w-3/5 h-screen bg-background">
 				<Image
 					src={watchtogether}
 					alt="watch-together"
 					className="object-cover w-full h-full"
 				/>
 			</div>
-			<div className="relative flex items-center w-2/5 h-screen text-center bg-white">
-				<div className="absolute left-0 flex items-center justify-center w-full h-16 bg-white top-8">
+			<div className="relative flex items-center w-2/5 h-screen text-center bg-background">
+				<div className="absolute left-0 flex items-center justify-center w-full h-16 bg-background top-8">
 					<Link href="/" className="flex items-center gap-2 ">
 						<motion.div
 							initial={{ rotate: -10, scale: 0.9 }}
