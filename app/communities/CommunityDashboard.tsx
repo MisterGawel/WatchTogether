@@ -1,17 +1,22 @@
-// components/CommunityDashboard.tsx
 'use client';
 
 import { Card } from '@heroui/react';
 import { Button } from '@heroui/button';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import type { User } from 'firebase/auth';
 
 interface DashboardProps {
+	user?: User | null;
 	totalCount: number;
 	userCount: number;
 }
 
-export function CommunityDashboard({ totalCount, userCount }: DashboardProps) {
+export function CommunityDashboard({
+	user,
+	totalCount,
+	userCount,
+}: DashboardProps) {
 	const cards = [
 		{
 			title: 'Toutes les communautés',
@@ -48,10 +53,22 @@ export function CommunityDashboard({ totalCount, userCount }: DashboardProps) {
 							<Button
 								color="primary"
 								size="lg"
-								href={c.href}
+								href={
+									c.href === '/communities/my-communities'
+										? user
+											? c.href
+											: '/auth/login'
+										: c.href
+								}
 								as={Link}
 							>
-								Aller
+								{c.href === '/communities/my-communities'
+									? userCount > 0
+										? 'Voir mes communautés'
+										: 'Se connecter'
+									: c.href === '/communities/create'
+										? 'Créer ma communauté'
+										: 'Voir toutes les communautés'}
 							</Button>
 						</Card>
 					</motion.div>

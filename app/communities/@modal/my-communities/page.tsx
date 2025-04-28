@@ -97,20 +97,12 @@ export default function AllCommunitiesModal() {
 	};
 	return (
 		<>
-			<Modal
-				defaultOpen={true}
-				onOpenChange={(open) => {
-					if (!open) {
-						router.push('/communities');
-					}
-					onOpenChange();
-				}}
-			>
+			<Modal defaultOpen={true} size="5xl" onOpenChange={onOpenChange}>
 				<ModalContent>
 					{(onClose) => (
 						<>
 							<ModalHeader>Mes communautés</ModalHeader>
-							<ModalBody>
+							<ModalBody className="max-h-[80vh] py-[2rem] overflow-y-auto">
 								{communities.userCommunities &&
 									communities.userCommunities.length > 0 && (
 										<div className="mb-8">
@@ -135,8 +127,8 @@ export default function AllCommunitiesModal() {
 																ease: 'easeOut',
 															}}
 															onClick={() =>
-																setSelectedCommunityId(
-																	commu.id
+																router.push(
+																	`/communities/${commu.id}`
 																)
 															}
 														>

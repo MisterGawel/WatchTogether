@@ -2,18 +2,21 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Button } from '@heroui/button';
 import { db, auth } from '../firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import CommunitySpace from './(community-room)/EspaceCommu';
 import { CommunityDashboard } from './CommunityDashboard';
+import type { User } from 'firebase/auth';
 
 type Community = {
 	id: string;
 	name: string;
 	description?: string;
-	[key: string]: any;
+	[key: string]: string | number | boolean | undefined;
+};
+
+type UserCommunitiesMap = {
+	[communityId: string]: 'admin' | 'member' | undefined;
 };
 
 export default function CommunityListPage() {
@@ -21,16 +24,11 @@ export default function CommunityListPage() {
 		userCommunities: Community[];
 		otherCommunities: Community[];
 	}>({ userCommunities: [], otherCommunities: [] });
-	const [loading, setLoading] = useState(false);
-	const [selectedCommunityId, setSelectedCommunityId] = useState<
-		string | null
-	>(null);
-	const [user, setUser] = useState<any>(null);
+	const [user, setUser] = useState<User | null>(null);
 	const [userCommunitiesMap, setUserCommunitiesMap] = useState<
-		Record<string, any>
+		Record<string, UserCommunitiesMap>
 	>({});
 
-	// Listen auth state & load user's communities map
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
 			if (currentUser) {
@@ -50,10 +48,10 @@ export default function CommunityListPage() {
 
 	useEffect(() => {
 		fetchCommunities();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [userCommunitiesMap]);
 
 	const fetchCommunities = async () => {
-		setLoading(true);
 		const querySnapshot = await getDocs(collection(db, 'communities'));
 		const all = querySnapshot.docs.map(
 			(d) => ({ id: d.id, ...d.data() }) as Community
@@ -64,26 +62,12 @@ export default function CommunityListPage() {
 			userCommunities: userList,
 			otherCommunities: otherList,
 		});
-		setLoading(false);
 	};
-
-	if (selectedCommunityId) {
-		return (
-			<div className="p-4">
-				<Button
-					onPress={() => setSelectedCommunityId(null)}
-					className="mb-4"
-				>
-					← Retour aux communautés
-				</Button>
-				<CommunitySpace Room={selectedCommunityId} />
-			</div>
-		);
-	}
 
 	return (
 		<div className="flex items-center justify-center min-h-screen px-4 py-10 bg-gray-50">
 			<CommunityDashboard
+				user={user}
 				totalCount={
 					communities.userCommunities.length +
 					communities.otherCommunities.length

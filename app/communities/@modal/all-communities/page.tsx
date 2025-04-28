@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card } from '@heroui/react';
-import { Button } from '@heroui/button';
 import { motion } from 'framer-motion';
 import { db, auth } from '@/app/firebase';
 import {
@@ -17,7 +16,6 @@ import {
 	Modal,
 	ModalContent,
 	ModalHeader,
-	ModalFooter,
 	useDisclosure,
 	ModalBody,
 } from '@heroui/modal';
