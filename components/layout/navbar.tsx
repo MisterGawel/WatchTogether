@@ -4,16 +4,39 @@ import { motion } from 'framer-motion';
 import { Classic } from '@theme-toggles/react';
 import { useEffect, useState } from 'react';
 
-export default function Navbar() {
-	const [isToggled, setToggle] = useState(false);
+export function useDarkMode() {
+	const [isDark, setIsDark] = useState<boolean | null>(null);
 
 	useEffect(() => {
-		if (isToggled) {
+		const saved = localStorage.getItem('theme');
+		if (saved === 'dark' || saved === 'light') {
+			setIsDark(saved === 'dark');
+		} else {
+			const prefers = window.matchMedia(
+				'(prefers-color-scheme: dark)'
+			).matches;
+			setIsDark(prefers);
+		}
+	}, []);
+
+	useEffect(() => {
+		if (isDark === null) return;
+		if (isDark) {
 			document.body.classList.add('dark');
+			localStorage.setItem('theme', 'dark');
 		} else {
 			document.body.classList.remove('dark');
+			localStorage.setItem('theme', 'light');
 		}
-	}, [isToggled]);
+	}, [isDark]);
+
+	return { isDark: !!isDark, toggle: () => setIsDark((prev) => !prev) };
+}
+
+export default function Navbar() {
+	const { isDark, toggle } = useDarkMode();
+
+	if (isDark === null) return null;
 
 	return (
 		<header className="border-b backdrop-blur supports-[backdrop-filter]:bg-background/60 w-full flex justify-center">
@@ -43,8 +66,8 @@ export default function Navbar() {
 					<div className="absolute flex items-center gap-2 -left-10">
 						{/* @ts-expect-error Toggle */}
 						<Classic
-							toggled={isToggled}
-							toggle={setToggle}
+							toggled={isDark}
+							toggle={toggle}
 							className="text-xl text-primary"
 						/>
 					</div>
