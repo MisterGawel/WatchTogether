@@ -7,13 +7,25 @@ import { Input } from '@heroui/input';
 import { Button } from '@heroui/button';
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
+import { useRouter } from 'next/navigation';
+import { createRoom } from './rooms/new/roomService';
 
 export default function Home() {
 	const [roomId, setRoomId] = useState('');
-
-	const handleCreateRoom = (e: React.FormEvent) => {
+	const router = useRouter();
+	const handleCreateRoom = async (e: React.FormEvent) => {
 		e.preventDefault();
-		alert(`Room créée avec l'ID: ${roomId || 'généré automatiquement'}`);
+
+		try {
+			const createdRoomId = await createRoom(roomId, '', '');
+			alert(
+				`Room créée avec l'ID: ${createdRoomId || 'généré automatiquement'}`
+			);
+			router.push(`/rooms/new/${createdRoomId}`);
+		} catch (error) {
+			console.error('Erreur lors de la création de la room:', error);
+			alert('Une erreur est survenue lors de la création de la room');
+		}
 	};
 
 	return (
