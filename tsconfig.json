@@ -33,6 +33,6 @@
 		"app/firebase.js",
 		"app/players/youtube-player.jsx",
 		"tailwind.config.js"
-	],
+, "app/players/page.jsx"	],
 	"exclude": ["node_modules"]
 }
