@@ -8,7 +8,7 @@ import {
 	setPersistence,
 	browserLocalPersistence,
 } from 'firebase/auth';
-import { onAuthStateChanged } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 interface FormData {
 	email: string;
@@ -16,6 +16,7 @@ interface FormData {
 }
 
 export default function LoginPage() {
+	const router = useRouter();
 	const [loading, setLoading] = React.useState<boolean>(false);
 	const [dataForm, setDataForm] = React.useState<FormData>({
 		email: '',
@@ -34,7 +35,9 @@ export default function LoginPage() {
 				dataForm.email,
 				dataForm.password
 			);
-			console.log(userCredential.user);
+			if (userCredential.user) {
+				router.push('/');
+			}
 		} catch (error) {
 			if (error instanceof Error) {
 				setErrorMessage(error.message);
