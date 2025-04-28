@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import ChatCommu from './chat';
-import { Card, CardHeader,Link} from '@heroui/react';
+import { Card, CardHeader, Link } from '@heroui/react';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import { db, auth } from '@/app/firebase';
@@ -12,13 +12,12 @@ import {
 	doc,
 	updateDoc,
 	deleteDoc,
-
 } from 'firebase/firestore';
 import CardRoom from './CardRoom';
 import CardAnnonce from './CardAnnonces';
 import InputAnnonce from './inputAnnonce';
 import InputRoom from './InputRoom';
-import getUsersInCommunity from './AfficherMembre'
+import getUsersInCommunity from './AfficherMembre';
 import CommunityMembers from './AfficherMembre';
 export default function CommunitySpace({ Room }) {
 	const CommuID = Room;
@@ -30,7 +29,6 @@ export default function CommunitySpace({ Room }) {
 	const [user, setUser] = useState(null);
 	const [communities, setCommunities] = useState({}); //Communaute du user verification admin
 
-	
 	/*Suppression d'annonces */
 	const deleteAnnonce = async (index) => {
 		try {
@@ -131,16 +129,16 @@ export default function CommunitySpace({ Room }) {
 	const DonnéesBase = async () => {
 		try {
 			const communitiesRef = doc(db, 'communities', CommuID);
-	
+
 			// ON ECOUTE en direct
 			onSnapshot(communitiesRef, async (communityDocSnapshot) => {
 				if (communityDocSnapshot.exists()) {
 					const data = communityDocSnapshot.data();
-	
+
 					setNomCommu(data.name);
-	
+
 					const roomsId = data.rooms || [];
-	
+
 					// Charge les rooms
 					const roomPromises = roomsId.map(async (roomId) => {
 						const roomRef = doc(db, 'rooms', roomId);
@@ -149,9 +147,11 @@ export default function CommunitySpace({ Room }) {
 							? { id: roomId, ...roomSnapshot.data() }
 							: null;
 					});
-					const rooms = (await Promise.all(roomPromises)).filter((room) => room !== null);
+					const rooms = (await Promise.all(roomPromises)).filter(
+						(room) => room !== null
+					);
 					setRoom(rooms);
-	
+
 					// Charge les annonces
 					const announcements = data.announcements || [];
 					setAnnonces(announcements);
@@ -160,7 +160,10 @@ export default function CommunitySpace({ Room }) {
 				}
 			});
 		} catch (error) {
-			console.error("Erreur lors de la récupération des données :", error);
+			console.error(
+				'Erreur lors de la récupération des données :',
+				error
+			);
 		}
 	};
 	useEffect(() => {
@@ -185,7 +188,7 @@ export default function CommunitySpace({ Room }) {
 	}, []);
 	useEffect(() => {
 		DonnéesBase();
-	}, []); 
+	}, []);
 
 	const isAdmin = (communityId) => {
 		return communities[communityId] === 'admin';
@@ -233,12 +236,9 @@ export default function CommunitySpace({ Room }) {
 					))}
 					{/* Section Salle (Événements, Infos, etc.) */}
 					<h2 className="mt-6 mb-4 text-xl font-bold">Salles</h2>
-					<InputRoom
-						role={role}
-						commuID={CommuID}
-					></InputRoom>
+					<InputRoom role={role} commuID={CommuID}></InputRoom>
 					{/* Affichage des cartes*/}
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{rooms.map((room) => (
 							<CardRoom
 								key={room.id}
@@ -249,7 +249,10 @@ export default function CommunitySpace({ Room }) {
 							/>
 						))}
 					</div>
-					<CommunityMembers communityId={CommuID} Role={role}></CommunityMembers>
+					<CommunityMembers
+						communityId={CommuID}
+						Role={role}
+					></CommunityMembers>
 				</div>
 				{/* Section Chat */}
 				<div className="flex-1 p-4 bg-grey-100">

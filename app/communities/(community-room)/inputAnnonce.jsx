@@ -17,7 +17,7 @@ export default function InputAnnonce({
 	return (
 		role === 'admin' && (
 			<div className="mb-4">
-				<Card className="shadow-lg p-4">
+				<Card className="p-4 shadow-lg">
 					<h3 className="text-lg font-semibold">
 						Ajouter une annonce
 					</h3>
@@ -27,7 +27,7 @@ export default function InputAnnonce({
 						placeholder="Écrire une annonce..."
 						className="w-full mt-2"
 					/>
-					<Button onPress={foncaddAnnonce} className="mt-2 w-full">
+					<Button onPress={foncaddAnnonce} className="w-full mt-2">
 						Ajouter l'annonce
 					</Button>
 				</Card>

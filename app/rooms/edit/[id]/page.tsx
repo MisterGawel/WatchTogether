@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { db } from '../../../../firebase';
+import { db } from '@/app/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 
@@ -63,17 +63,17 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-				<div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+				<div className="w-12 h-12 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
 			</div>
 		);
 	}
 
 	// Vérifie si l'utilisateur courant est l'admin
-	const isAdmin = roomData?.admin === CURRENT_USER_ID;
+	const isAdmin = roomData?.admin === 'currentUserId'; // Remplacez 'currentUserId' par l'ID de l'utilisateur courant
 
 	return (
 		<div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-			<div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96 space-y-4">
+			<div className="p-6 space-y-4 bg-white rounded-lg shadow-lg dark:bg-gray-800 w-96">
 				<h1 className="text-2xl font-bold text-gray-900 dark:text-white">
 					{roomData?.name || 'Unknown Room'}
 				</h1>
@@ -96,7 +96,7 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
 						onClick={() =>
 							router.push(`/rooms/edit/${resolvedParams.id}`)
 						}
-						className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-md transition"
+						className="w-full py-2 text-white transition bg-green-500 rounded-md hover:bg-green-600"
 					>
 						Modifier la Room
 					</button>
@@ -105,7 +105,7 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
 				{/* Bouton de copie */}
 				<button
 					onClick={handleCopyLink}
-					className="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md transition"
+					className="w-full py-2 mt-4 text-white transition bg-blue-500 rounded-md hover:bg-blue-600"
 				>
 					Copy Room Link
 				</button>

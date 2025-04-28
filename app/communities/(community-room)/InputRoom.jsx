@@ -1,15 +1,15 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createRoom } from '../rooms/new/roomService';
+import { createRoom } from '../../rooms/new/roomService';
 import { Card, Button, Input } from '@heroui/react';
 
-export default function InputRoom({ role ,commuID}) {
+export default function InputRoom({ role, commuID }) {
 	const [roomName, setRoomName] = useState('');
 	const router = useRouter();
 
 	const communityID = commuID;
-	const idAdmin = '2';//je sais ce que c'est
+	const idAdmin = '2'; //je sais ce que c'est
 
 	const handleSubmit = async () => {
 		if (!roomName.trim()) {

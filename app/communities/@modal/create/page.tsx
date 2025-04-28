@@ -13,6 +13,7 @@ import { Input } from '@heroui/input';
 import { Button } from '@heroui/button';
 import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '@/app/firebase';
+import { useRouter } from 'next/navigation';
 
 export default function CreateCommunity({
 	onCreated,
@@ -23,7 +24,9 @@ export default function CreateCommunity({
 	const [desc, setDesc] = useState('');
 	const [loading, setLoading] = useState(false);
 
-	const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+	const router = useRouter();
+
+	const { onOpenChange } = useDisclosure();
 
 	const handleCreateCommunity = async () => {
 		if (!name.trim()) return;
@@ -36,7 +39,6 @@ export default function CreateCommunity({
 
 		setLoading(true);
 		try {
-			// 1. Crée la communauté
 			const communityRef = await addDoc(collection(db, 'communities'), {
 				name,
 				description: desc,
@@ -44,18 +46,16 @@ export default function CreateCommunity({
 				rooms: [],
 			});
 
-			// 2. Ajoute l'utilisateur en tant qu'admin dans son profil
 			const userRef = doc(db, 'users', currentUser.uid);
 			await updateDoc(userRef, {
 				[`communities.${communityRef.id}`]: 'admin',
 			});
 
-			// 3. Reset & callbacks
 			setName('');
 			setDesc('');
 			setLoading(false);
-			onClose();
 			onCreated();
+			router.push(`/communities/${communityRef.id}`);
 		} catch (error) {
 			console.error('Erreur lors de la création :', error);
 			setLoading(false);
@@ -64,13 +64,15 @@ export default function CreateCommunity({
 
 	return (
 		<>
-			<Button
-				onPress={onOpen}
-				className="bg-primary text-primary-foreground"
+			<Modal
+				defaultOpen={true}
+				onOpenChange={(open) => {
+					if (!open) {
+						router.push('/communities');
+					}
+					onOpenChange();
+				}}
 			>
-				Créer une communauté
-			</Button>
-			<Modal isOpen={isOpen} onOpenChange={onOpenChange}>
 				<ModalContent>
 					{(onClose) => (
 						<>
