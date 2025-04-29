@@ -81,11 +81,9 @@ export default function ChatCommu({ Role, roomId }) {
 	};
 
 	return (
-		<div className="">
-			<h1 className="p-4 text-xl font-bold text-center shadow-md bg-grey-100">
-				Espace de Chat
-			</h1>
-			<div className="flex-grow p-4 space-y-2 overflow-y-auto bg-white">
+		<div className="w-full p-6 overflow-y-auto bg-white border-2 border-gray-100 shadow-sm rounded-xl">
+			<h2 className="mb-4 text-xl font-bold">Chat communautaire</h2>
+			<div className="flex-grow space-y-2 overflow-y-auto bg-white ">
 				{messages.map((msg) => {
 					const isMessageExpanded = expandedMessage === msg.id;
 					const truncatedText =
@@ -94,8 +92,11 @@ export default function ChatCommu({ Role, roomId }) {
 							: msg.text;
 
 					return (
-						<Card key={msg.id} className="relative p-2">
-							<p className="font-semibold">{msg.user}</p>
+						<Card
+							key={msg.id}
+							className="relative px-4 py-3 shadow-none bg-background"
+						>
+							<p className="text-base font-medium">{msg.user}</p>
 							{Role === 'admin' && (
 								<Button
 									isIconOnly
@@ -108,7 +109,7 @@ export default function ChatCommu({ Role, roomId }) {
 									×
 								</Button>
 							)}
-							<p>{truncatedText}</p>
+							<p className="text-base">{truncatedText}</p>
 							{msg.text.length > MAX_LENGTH && (
 								<Button
 									onPress={() => toggleExpandMessage(msg.id)}
@@ -123,7 +124,7 @@ export default function ChatCommu({ Role, roomId }) {
 					);
 				})}
 			</div>
-			<div className="flex p-4 space-x-2 bg-white">
+			<div className="flex py-4 space-x-2 bg-white">
 				<Input
 					value={newMessage}
 					onChange={(e) => setNewMessage(e.target.value)}
@@ -132,6 +133,7 @@ export default function ChatCommu({ Role, roomId }) {
 				/>
 				<Button
 					onPress={sendMessage}
+					color="primary"
 					className="flex items-center gap-2"
 				>
 					Envoyer

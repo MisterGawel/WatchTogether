@@ -6,6 +6,7 @@ import { Card } from '@heroui/react';
 import { Button } from '@heroui/button';
 import { db } from '../../firebase';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { Chip } from '@heroui/chip';
 
 const getUsersInCommunity = async (communityId) => {
 	const usersRef = collection(db, 'users');
@@ -70,28 +71,41 @@ export default function CommunityMembers({ communityId, Role }) {
 	}
 
 	return (
-		<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-			{members.map((member) => (
-				<Card key={member.id} className="p-6 shadow-lg rounded-2xl">
-					<h2 className="text-xl font-bold">
-						{member.name || 'Utilisateur inconnu'}
-					</h2>
-					<p className="mt-2 text-gray-600">
-						Rôle : {member.communities?.[communityId] || 'membre'}
-					</p>
-
-					{/* Si moi je suis Admin (Role === 'admin') et que le membre n'est pas admin */}
-					{Role === 'admin' &&
-						member.communities?.[communityId] !== 'admin' && (
-							<Button
-								className="mt-4"
-								onClick={() => promoteToAdmin(member.id)}
+		<div className="w-full p-6 overflow-y-auto bg-white border-2 border-gray-100 shadow-sm rounded-xl">
+			<h2 className="mb-4 text-xl font-bold">Membres</h2>
+			<div className="flex flex-col gap-4">
+				{members.map((member) => (
+					<Card
+						key={member.id}
+						className="px-4 py-2.5 bg-background shadow-none"
+					>
+						<div className="flex items-center justify-between gap-4">
+							<h2 className="text-base font-medium">
+								{member.name || 'Utilisateur inconnu'}
+							</h2>
+							<Chip
+								className={`${member.communities?.[communityId] === 'admin' ? 'bg-green-100 text-green-800' : 'bg-gray-300 text-gray-800'} font-bold rounded-lg`}
+								size="sm"
 							>
-								Promouvoir en Admin
-							</Button>
-						)}
-				</Card>
-			))}
+								{member.communities?.[communityId] === 'admin'
+									? 'Admin'
+									: 'Membre'}
+							</Chip>
+						</div>
+
+						{/* Si moi je suis Admin (Role === 'admin') et que le membre n'est pas admin */}
+						{Role === 'admin' &&
+							member.communities?.[communityId] !== 'admin' && (
+								<Button
+									className="mt-4"
+									onClick={() => promoteToAdmin(member.id)}
+								>
+									Promouvoir en Admin
+								</Button>
+							)}
+					</Card>
+				))}
+			</div>
 		</div>
 	);
 }
