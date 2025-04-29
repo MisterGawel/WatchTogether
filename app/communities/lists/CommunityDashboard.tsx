@@ -7,6 +7,7 @@ import { Button } from '@heroui/button';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import type { User } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 interface DashboardProps {
 	user?: User | null;
@@ -19,26 +20,27 @@ export function CommunityDashboard({
 	totalCount,
 	userCount,
 }: DashboardProps) {
+	const router = useRouter();
 	const cards = [
 		{
 			title: 'Toutes les communautés',
 			subtitle: `${totalCount} au total`,
-			href: '/communities/all-communities',
+			href: '/communities/lists/all-communities',
 			label: 'Voir toutes les communautés',
 			icon: RiCommunityFill,
 		},
 		{
 			title: 'Mes communautés',
 			subtitle: `${userCount} auxquelles je participe`,
-			href: user ? '/communities/my-communities' : '/auth/login',
+			href: user ? '/communities/lists/my-communities' : '/auth/login',
 			label: userCount > 0 ? 'Voir mes communautés' : 'Se connecter',
 			icon: AiFillHome,
 		},
 		{
 			title: 'Créer une nouvelle communauté',
 			subtitle: 'Lancez votre espace !',
-			href: '/communities/create',
-			label: 'Créer ma communauté',
+			href: user ? '/communities/lists/create' : '/auth/login',
+			label: user ? 'Créer une communauté' : 'Se connecter',
 			icon: IoIosAddCircle,
 		},
 	];

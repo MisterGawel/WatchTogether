@@ -1,7 +1,4 @@
-// app/communities/layout.tsx
-'use client';
-
-export default function CommunitiesLayout({
+export default function ListsLayout({
 	children,
 	modal,
 }: {
@@ -11,8 +8,7 @@ export default function CommunitiesLayout({
 	return (
 		<div className="relative">
 			{children}
-
-			{modal}
+			{modal && modal}
 		</div>
 	);
 }

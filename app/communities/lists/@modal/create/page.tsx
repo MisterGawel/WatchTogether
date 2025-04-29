@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
 	Modal,
 	ModalContent,
@@ -13,16 +13,25 @@ import { Input } from '@heroui/input';
 import { Button } from '@heroui/button';
 import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '@/app/firebase';
+import type { User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
-export default function CreateCommunity({
-	onCreated,
-}: {
-	onCreated: () => void;
-}) {
+export default function CreateCommunity() {
 	const [name, setName] = useState('');
 	const [desc, setDesc] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [user, setUser] = useState<User | null>(null);
+
+	useEffect(() => {
+		const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+			if (currentUser) {
+				setUser(currentUser);
+			} else {
+				setUser(null);
+			}
+		});
+		return () => unsubscribe();
+	}, []);
 
 	const router = useRouter();
 
@@ -30,12 +39,8 @@ export default function CreateCommunity({
 
 	const handleCreateCommunity = async () => {
 		if (!name.trim()) return;
-
-		const currentUser = auth.currentUser;
-		if (!currentUser) {
-			console.error('Aucun utilisateur connecté.');
-			return;
-		}
+		if (!desc.trim()) return;
+		if (!user) return;
 
 		setLoading(true);
 		try {
@@ -46,7 +51,7 @@ export default function CreateCommunity({
 				rooms: [],
 			});
 
-			const userRef = doc(db, 'users', currentUser.uid);
+			const userRef = doc(db, 'users', user.uid);
 			await updateDoc(userRef, {
 				[`communities.${communityRef.id}`]: 'admin',
 			});
@@ -54,7 +59,6 @@ export default function CreateCommunity({
 			setName('');
 			setDesc('');
 			setLoading(false);
-			onCreated();
 			router.push(`/communities/${communityRef.id}`);
 		} catch (error) {
 			console.error('Erreur lors de la création :', error);
@@ -105,10 +109,14 @@ export default function CreateCommunity({
 								</Button>
 								<Button
 									color="primary"
-									onPress={handleCreateCommunity}
+									onPress={
+										user
+											? handleCreateCommunity
+											: () => router.push('/auth/login')
+									}
 									isLoading={loading}
 								>
-									Créer
+									{user ? 'Créer' : 'Se connecter'}
 								</Button>
 							</ModalFooter>
 						</>

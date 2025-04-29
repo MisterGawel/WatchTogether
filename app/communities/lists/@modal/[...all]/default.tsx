@@ -1,4 +1,4 @@
-import CommunityListPage from '../communities/CommunityList';
+import CommunityListPage from '../../CommunityList';
 
 export default async function CommunitiesPage() {
 	return <CommunityListPage />;

@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { db, auth } from '../firebase';
+import { db, auth } from '@/app/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { CommunityDashboard } from './CommunityDashboard';

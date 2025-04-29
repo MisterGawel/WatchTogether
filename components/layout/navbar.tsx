@@ -63,14 +63,18 @@ export default function Navbar() {
 					</motion.span>
 				</Link>
 				<div className="relative flex items-center gap-4">
-					<div className="absolute flex items-center gap-2 -left-10">
-						{/* @ts-expect-error Toggle */}
-						<Classic
-							toggled={isDark}
-							toggle={toggle}
-							className="text-xl text-primary"
-						/>
-					</div>
+					<Link
+						href="/communities"
+						className="mr-4 text-sm font-medium text-popover-foreground hover:opacity-60"
+					>
+						Communautés
+					</Link>
+					{/* @ts-expect-error Toggle */}
+					<Classic
+						toggled={isDark}
+						toggle={toggle}
+						className="text-xl text-primary"
+					/>
 					<AuthState />
 				</div>
 			</div>
