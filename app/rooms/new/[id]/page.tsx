@@ -2,52 +2,55 @@
 
 import { useEffect, useState } from 'react';
 import { db, auth } from '@/app/firebase';
-import {
-	doc,
-	addDoc,
-	deleteDoc,
-	writeBatch,
-	collection,
-	getDocs,
-	onSnapshot,
-	serverTimestamp,
-} from 'firebase/firestore';
+import { doc,getDoc, addDoc,serverTimestamp,collection } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import ChatRoom from './chat';
-import ChatVideos from './chatVideos';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { useRoomParams, useRoomActions } from './params';
 import { VideoPlayer, CurrentVideo } from './lecteur_video';
+import ChatRoom  from './chat';
+import ChatVideos  from './chatVideos';
 
 export default function RoomPage({ params }: { params: Promise<any> }) {
-	const { roomData, loading, resolvedParams } = useRoomParams(params);
-	const [showModal, setShowModal] = useState<boolean>(false);
-	const [darkMode, setDarkMode] = useState<boolean>(false);
-	const [videoUrl, setVideoUrl] = useState<string>('');
-	const router = useRouter();
-	const [showMenu, setShowMenu] = useState(false);
-	const [currentUser, setCurrentUser] = useState<User | null>(null);
-	const [pausedVideo, setPausedVideo] = useState<CurrentVideo | null>(null);
-	const [message, setMessage] = useState<string>('');
+    const { roomData, loading, resolvedParams } = useRoomParams(params);
+    const [showModal, setShowModal] = useState<boolean>(false);
+    const [darkMode, setDarkMode] = useState<boolean>(false);
+    const [videoUrl, setVideoUrl] = useState<string>('');
+    const router = useRouter();
+    const [showMenu, setShowMenu] = useState(false);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [pausedVideo, setPausedVideo] = useState<CurrentVideo | null>(null);
+    const [message, setMessage] = useState<string>('');
+    const [userName, setUserName] = useState<string>(''); 
 
-	const {
-		isAdmin,
-		handleCopyLink,
-		handleDeleteRoom,
-		handleDeleteAllMessages,
-		handleDeleteAllLinks,
-	} = useRoomActions(resolvedParams, roomData, currentUser);
+    const {
+        isAdmin,
+        handleCopyLink,
+        handleDeleteRoom,
+        handleDeleteAllMessages,
+        handleDeleteAllLinks,
+    } = useRoomActions(resolvedParams, roomData, currentUser);
 
-	useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, (user) => {
-			if (user) {
-				setCurrentUser(user);
-			} else {
-				setCurrentUser(null);
-			}
-		});
-		return () => unsubscribe();
-	}, [router]);
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                setCurrentUser(user); // <- On stocke l'utilisateur connecté
+                const docRef = doc(db, 'users', user.uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    setUserName(data.name || '');  // Petit fallback au cas où 'name' n'existe pas
+                } else {
+                    console.log('Aucun utilisateur trouvé pour cet UID.');
+                }
+            } else {
+                setCurrentUser(null);
+                router.push('/'); 
+            }
+        });
+
+        return () => unsubscribe();
+    }, [router]);
 
 	useEffect(() => {
 		const savedDarkMode = localStorage.getItem('darkMode') === 'true';
@@ -167,7 +170,7 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
 						<div className="h-full bg-white rounded-lg shadow-lg dark:bg-gray-800">
 							<ChatRoom
 								roomId={resolvedParams.id}
-								currentUser={currentUser?.displayName  || 'anonymous'}
+								currentUser={userName || 'anonymous'}
 								initialMessages={[]}
 								Role={isAdmin ? 'admin' : 'user'}
 							/>
@@ -180,7 +183,7 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
 						<div className="h-full bg-white rounded-lg shadow-lg dark:bg-gray-800">
 							<ChatVideos
 								roomId={resolvedParams.id}
-								currentUser={currentUser?.displayName  || 'anonymous'}
+								currentUser={userName || 'anonymous'}
 								initialMessages={[]}
 								Role={isAdmin ? 'admin' : 'user'}
 							/>
