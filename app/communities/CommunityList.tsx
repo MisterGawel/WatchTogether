@@ -67,7 +67,7 @@ export default function CommunityListPage() {
 	};
 
 	return (
-		<div className="flex items-center justify-center min-h-screen px-4 py-10 bg-background">
+		<div className="flex items-center justify-center min-h-screen px-4 py-10">
 			<Button
 				className="absolute top-4 left-4"
 				color="primary"

@@ -11,13 +11,7 @@ import {
 	updateDoc,
 	getDoc,
 } from 'firebase/firestore';
-import {
-	Modal,
-	ModalContent,
-	ModalHeader,
-	useDisclosure,
-	ModalBody,
-} from '@heroui/modal';
+import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/modal';
 import type { User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -33,7 +27,6 @@ export default function AllCommunitiesModal() {
 	>({});
 	const [user, setUser] = useState<User | null>(null);
 	const router = useRouter();
-	const { onOpenChange } = useDisclosure();
 
 	const fetchCommunities = async () => {
 		setLoading(true);
@@ -88,7 +81,13 @@ export default function AllCommunitiesModal() {
 
 	if (loading) {
 		return (
-			<Modal defaultOpen={true} size="5xl" onOpenChange={onOpenChange}>
+			<Modal
+				defaultOpen={true}
+				size="5xl"
+				onOpenChange={() => {
+					router.push('/communities');
+				}}
+			>
 				<ModalContent>
 					{() => (
 						<>
@@ -115,84 +114,71 @@ export default function AllCommunitiesModal() {
 	} else
 		return (
 			<>
-				<Modal defaultOpen={true} size="5xl">
+				<Modal
+					defaultOpen={true}
+					size="5xl"
+					onOpenChange={() => {
+						router.push('/communities');
+					}}
+				>
 					<ModalContent>
-						{() => (
-							<>
-								<ModalHeader>
-									Toutes les communautés
-								</ModalHeader>
-								<ModalBody className="max-h-[80vh] py-[2rem] overflow-y-auto">
-									{communities && communities.length > 0 && (
-										<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-7xl">
-											{sortedCommunities.map(
-												(commu, index) => (
-													<motion.div
-														key={commu.id}
-														initial={{
-															opacity: 0,
-															y: 10,
-														}}
-														animate={{
-															opacity: 1,
-															y: 0,
-														}}
-														transition={{
-															delay:
-																index * 0.025,
-															duration: 0.3,
-															ease: 'easeOut',
-														}}
-														onClick={() =>
-															userCommunities[
-																commu.id
-															]
-																? router.push(
-																		`/communities/${commu.id}`
-																	)
-																: joinCommunity(
-																		commu.id
-																	)
-														}
-													>
-														<Card
-															className={`relative group p-4 transition-all duration-300 border border-gray-200 shadow-sm cursor-pointer min-h-32 rounded-2xl hover:shadow-lg hover:border-gray-300 ${
-																userCommunities[
-																	commu.id
-																]
-																	? 'bg-black bg-opacity-15 opacity-55'
-																	: 'bg-background'
-															}`}
-														>
-															{/* Overlay au hover */}
-															<div className="absolute inset-0 z-50 flex items-center justify-center text-sm font-medium text-white transition-opacity duration-300 bg-black opacity-0 bg-opacity-70 rounded-2xl group-hover:opacity-100">
-																{userCommunities[
-																	commu.id
-																]
-																	? 'Vous êtes déjà dans cette communauté'
-																	: 'Cliquez pour rejoindre cette communauté'}
-															</div>
+						<ModalHeader>Toutes les communautés</ModalHeader>
+						<ModalBody className="max-h-[80vh] py-[2rem] overflow-y-auto">
+							{communities && communities.length > 0 && (
+								<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-7xl">
+									{sortedCommunities.map((commu, index) => (
+										<motion.div
+											key={commu.id}
+											initial={{
+												opacity: 0,
+												y: 10,
+											}}
+											animate={{
+												opacity: 1,
+												y: 0,
+											}}
+											transition={{
+												delay: index * 0.025,
+												duration: 0.3,
+												ease: 'easeOut',
+											}}
+											onClick={() =>
+												userCommunities[commu.id]
+													? router.push(
+															`/communities/${commu.id}`
+														)
+													: joinCommunity(commu.id)
+											}
+										>
+											<Card
+												className={`relative group p-4 transition-all duration-300 border border-gray-200 shadow-sm cursor-pointer min-h-32 rounded-2xl hover:shadow-lg hover:border-gray-300 ${
+													userCommunities[commu.id]
+														? 'bg-black bg-opacity-15 opacity-55'
+														: 'bg-background'
+												}`}
+											>
+												{/* Overlay au hover */}
+												<div className="absolute inset-0 z-50 flex items-center justify-center text-sm font-medium text-white transition-opacity duration-300 bg-black opacity-0 bg-opacity-70 rounded-2xl group-hover:opacity-100">
+													{userCommunities[commu.id]
+														? 'Vous êtes déjà dans cette communauté'
+														: 'Cliquez pour rejoindre cette communauté'}
+												</div>
 
-															{/* Contenu visible en dessous */}
-															<div className="relative z-20">
-																<h2 className="text-xl font-semibold text-primary">
-																	{commu.name}
-																</h2>
-																<p className="mt-2 text-sm text-gray-600 line-clamp-3">
-																	{
-																		commu.description
-																	}
-																</p>
-															</div>
-														</Card>
-													</motion.div>
-												)
-											)}
-										</div>
-									)}
-								</ModalBody>
-							</>
-						)}
+												{/* Contenu visible en dessous */}
+												<div className="relative z-20">
+													<h2 className="text-xl font-semibold text-primary">
+														{commu.name}
+													</h2>
+													<p className="mt-2 text-sm text-gray-600 line-clamp-3">
+														{commu.description}
+													</p>
+												</div>
+											</Card>
+										</motion.div>
+									))}
+								</div>
+							)}
+						</ModalBody>
 					</ModalContent>
 				</Modal>
 			</>

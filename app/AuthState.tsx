@@ -19,8 +19,8 @@ import { LogOut } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
 const items = [
-	{ title: 'Mon profil', url: '/profile', icon: FaUser },
-	{ title: 'Mes communautés', url: '/communities', icon: FaUsers },
+	{ title: 'Profil', url: '/profile', icon: FaUser },
+	{ title: 'Communautés', url: '/communities', icon: FaUsers },
 ];
 
 export function AuthState() {

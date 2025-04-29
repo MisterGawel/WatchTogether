@@ -1,11 +1,11 @@
 import CommunitySpaceContent from './CommunitySpace';
 
-export default function CommunitySpace({
+export default async function CommunitySpace({
 	params,
 }: {
-	params: { communityId: string };
+	params: Promise<{ communityId: string }>;
 }) {
-	const { communityId } = params;
+	const { communityId } = await params;
 
 	return (
 		<div className="flex flex-col w-full h-full">

@@ -63,12 +63,6 @@ export default function Navbar() {
 					</motion.span>
 				</Link>
 				<div className="relative flex items-center gap-4">
-					<Link
-						href="/communities"
-						className="mr-4 text-sm font-medium text-popover-foreground hover:opacity-60"
-					>
-						Communautés
-					</Link>
 					{/* @ts-expect-error Toggle */}
 					<Classic
 						toggled={isDark}

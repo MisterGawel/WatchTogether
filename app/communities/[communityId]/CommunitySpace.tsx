@@ -15,12 +15,12 @@ import {
 	updateDoc,
 	deleteDoc,
 } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 import CardRoom from '../(community-room)/CardRoom';
 import CardAnnonce from '../(community-room)/CardAnnonces';
-import InputAnnonce from '../(community-room)/inputAnnonce';
-import InputRoom from '../(community-room)/InputRoom';
 import getUsersInCommunity from '../(community-room)/AfficherMembre';
 import CommunityMembers from '../(community-room)/AfficherMembre';
+import type { User } from 'firebase/auth';
 
 export default function CommunitySpace({
 	communityId,
@@ -32,8 +32,8 @@ export default function CommunitySpace({
 	const [communityName, setCommunityName] = useState('');
 	const [annonces, setAnnonces] = useState([]);
 	const [newAnnonce, setNewAnnonce] = useState('');
-	const [user, setUser] = useState(null);
-	const [communities, setCommunities] = useState({}); //Communaute du user verification admin
+	const [user, setUser] = useState<User | null>(null);
+	const [communities, setCommunities] = useState({});
 
 	/*Suppression d'annonces */
 	const deleteAnnonce = async (index) => {
@@ -65,33 +65,7 @@ export default function CommunitySpace({
 			);
 		}
 	};
-	/*AJOUT D'ANNONCE*/
-	const addAnnonce = async () => {
-		if (newAnnonce.trim() !== '') {
-			try {
-				const newAnnonceObj = newAnnonce;
-				const communityDocRef = doc(db, 'communities', communityId);
-				const communityDocSnapshot = await getDoc(communityDocRef);
-				if (communityDocSnapshot.exists()) {
-					const currentAnnonces =
-						communityDocSnapshot.data().announcements || [];
-					const updatedAnnonces = [...currentAnnonces, newAnnonceObj];
-					// Mettre à jour le document dans Firestore
-					await updateDoc(communityDocRef, {
-						announcements: updatedAnnonces,
-					});
 
-					// Mettre à jour l'état local
-					setAnnonces(updatedAnnonces);
-					setNewAnnonce('');
-				} else {
-					// console.log("Le document de la communauté n'existe pas !");
-				}
-			} catch (error) {
-				// console.error("Erreur lors de l'ajout de l'annonce :", error);
-			}
-		}
-	};
 	/*Suppression Room */
 	const deleteRoom = async (roomId) => {
 		try {
@@ -199,12 +173,15 @@ export default function CommunitySpace({
 	const isAdmin = (communityId) => {
 		return communities[communityId] === 'admin';
 	};
+
 	let role = 'member';
 	if (isAdmin(communityId)) {
 		role = 'admin';
 	}
+
+	const router = useRouter();
 	return (
-		<div className="flex flex-col min-h-screen p-8">
+		<div className="flex flex-col min-h-full p-8">
 			<div className="flex justify-between gap-8">
 				<Card className="w-full py-2">
 					<CardHeader className="relative flex items-center justify-center">
@@ -223,8 +200,11 @@ export default function CommunitySpace({
 								color="primary"
 								isIconOnly
 								size="md"
-								as={Link}
-								href={`/communities`}
+								onPress={() => {
+									router.push(
+										`/communities/${communityId}/create-announce`
+									);
+								}}
 							>
 								<BsFillMegaphoneFill />
 							</Button>
@@ -232,8 +212,11 @@ export default function CommunitySpace({
 								color="primary"
 								isIconOnly
 								size="md"
-								as={Link}
-								href={`/communities`}
+								onPress={() => {
+									router.push(
+										`/communities/${communityId}/create-room`
+									);
+								}}
 							>
 								<BsFillCameraVideoFill />
 							</Button>
@@ -242,7 +225,7 @@ export default function CommunitySpace({
 								isIconOnly
 								size="md"
 								as={Link}
-								href={`/communities`}
+								href={`/communities/members`}
 							>
 								<FaUsers />
 							</Button>
@@ -253,14 +236,6 @@ export default function CommunitySpace({
 			<div className="flex flex-grow">
 				{/* Section Annonces et Cartes */}
 				<div className="w-2/3 p-4 overflow-y-auto">
-					{/* Ajouter une annonce (visible uniquement pour l'admin) */}
-					<InputAnnonce
-						role={role}
-						ValeurChamp={newAnnonce}
-						foncNewAnnonce={(e) => setNewAnnonce(e.target.value)}
-						foncaddAnnonce={addAnnonce}
-					></InputAnnonce>
-
 					<h2 className="mb-4 text-xl font-bold">Annonces</h2>
 					{annonces.map((annonce, index) => (
 						<CardAnnonce
@@ -272,11 +247,7 @@ export default function CommunitySpace({
 					))}
 					{/* Section Salle (Événements, Infos, etc.) */}
 					<h2 className="mt-6 mb-4 text-xl font-bold">Salles</h2>
-					<InputRoom
-						role={role}
-						communityId={communityId}
-					></InputRoom>
-					{/* Affichage des cartes*/}
+
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{rooms.map((room) => (
 							<CardRoom

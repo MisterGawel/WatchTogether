@@ -11,21 +11,6 @@ export default function InputRoom({ role, commuID }) {
 	const communityID = commuID;
 	const idAdmin = '2'; //je sais ce que c'est
 
-	const handleSubmit = async () => {
-		if (!roomName.trim()) {
-			alert('Veuillez entrer un nom de salle');
-			return;
-		}
-
-		try {
-			const roomId = await createRoom(roomName, communityID, idAdmin);
-			//router.push(`/rooms/new/${roomId}`);
-		} catch (error) {
-			console.error('Erreur création room:', error);
-			alert('Erreur lors de la création de la salle');
-		}
-	};
-
 	return (
 		role === 'admin' && (
 			<div className="mb-4">

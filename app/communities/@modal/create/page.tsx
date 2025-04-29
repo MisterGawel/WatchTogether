@@ -6,7 +6,6 @@ import {
 	ModalContent,
 	ModalHeader,
 	ModalFooter,
-	useDisclosure,
 	ModalBody,
 } from '@heroui/modal';
 import { Input } from '@heroui/input';
@@ -34,8 +33,6 @@ export default function CreateCommunity() {
 	}, []);
 
 	const router = useRouter();
-
-	const { onOpenChange } = useDisclosure();
 
 	const handleCreateCommunity = async () => {
 		if (!name.trim()) return;
@@ -70,57 +67,48 @@ export default function CreateCommunity() {
 		<>
 			<Modal
 				defaultOpen={true}
-				onOpenChange={(open) => {
-					if (!open) {
-						router.push('/communities');
-					}
-					onOpenChange();
+				onOpenChange={() => {
+					router.push('/communities');
 				}}
 			>
 				<ModalContent>
-					{(onClose) => (
-						<>
-							<ModalHeader>Créer une communauté</ModalHeader>
-							<ModalBody>
-								<div className="mt-4 space-y-4">
-									<Input
-										placeholder="Nom de la communauté"
-										value={name}
-										onChange={(e) =>
-											setName(e.target.value)
-										}
-									/>
-									<Input
-										placeholder="Description"
-										value={desc}
-										onChange={(e) =>
-											setDesc(e.target.value)
-										}
-									/>
-								</div>
-							</ModalBody>
-							<ModalFooter>
-								<Button
-									color="danger"
-									variant="light"
-									onPress={onClose}
-								>
-									Annuler
-								</Button>
-								<Button
-									color="primary"
-									onPress={
-										user
-											? handleCreateCommunity
-											: () => router.push('/auth/login')
-									}
-									isLoading={loading}
-								>
-									{user ? 'Créer' : 'Se connecter'}
-								</Button>
-							</ModalFooter>
-						</>
-					)}
+					<ModalHeader>Créer une communauté</ModalHeader>
+					<ModalBody>
+						<div className="mt-4 space-y-4">
+							<Input
+								placeholder="Nom de la communauté"
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+							/>
+							<Input
+								placeholder="Description"
+								value={desc}
+								onChange={(e) => setDesc(e.target.value)}
+							/>
+						</div>
+					</ModalBody>
+					<ModalFooter>
+						<Button
+							color="danger"
+							variant="light"
+							onPress={() => {
+								router.push('/communities');
+							}}
+						>
+							Annuler
+						</Button>
+						<Button
+							color="primary"
+							onPress={
+								user
+									? handleCreateCommunity
+									: () => router.push('/auth/login')
+							}
+							isLoading={loading}
+						>
+							{user ? 'Créer' : 'Se connecter'}
+						</Button>
+					</ModalFooter>
 				</ModalContent>
 			</Modal>
 		</>
