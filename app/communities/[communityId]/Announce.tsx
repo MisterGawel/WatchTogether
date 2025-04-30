@@ -18,7 +18,7 @@ export default function CardAnnonce({
 	return (
 		<div className="mb-4">
 			<Card className="p-4 shadow-none bg-background">
-				<p className="text-gray-700 ">{announce}</p>
+				<p className="text-foreground">{announce}</p>
 				{role === 'admin' && (
 					<Button
 						isIconOnly

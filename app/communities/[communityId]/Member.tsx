@@ -82,7 +82,7 @@ export default function CommunityMembers({
 	}
 
 	return (
-		<div className="w-full p-6 overflow-y-auto bg-white border-2 border-gray-100 shadow-sm rounded-xl">
+		<div className="w-full p-6 overflow-y-auto border-2 shadow-sm bg-content1 border-background rounded-xl">
 			<h2 className="mb-4 text-xl font-bold">Membres</h2>
 			<div className="flex flex-col gap-4">
 				{members.map((member) => (

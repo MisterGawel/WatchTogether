@@ -93,9 +93,9 @@ export default function ChatCommu({
 	};
 
 	return (
-		<div className="w-full p-6 overflow-y-auto bg-white border-2 border-gray-100 shadow-sm rounded-xl">
+		<div className="w-full p-6 overflow-y-auto border-2 shadow-sm bg-content1 border-background rounded-xl">
 			<h2 className="mb-4 text-xl font-bold">Chat communautaire</h2>
-			<div className="flex-grow space-y-2 overflow-y-auto bg-white ">
+			<div className="flex-grow space-y-2 overflow-y-auto ">
 				{messages.map((msg) => {
 					const isMessageExpanded = expandedMessage === msg.id;
 					const truncatedText =
@@ -138,7 +138,7 @@ export default function ChatCommu({
 					);
 				})}
 			</div>
-			<div className="flex py-4 space-x-2 bg-white">
+			<div className="flex py-4 space-x-2 ">
 				<Input
 					value={newMessage}
 					onChange={(e) => setNewMessage(e.target.value)}

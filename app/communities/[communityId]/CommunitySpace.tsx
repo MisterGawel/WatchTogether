@@ -106,7 +106,7 @@ export default function CommunitySpace({
 	return (
 		<div className="flex flex-col min-h-full p-8">
 			<div className="flex justify-between gap-8 ">
-				<Card className="w-full py-2 border-2 border-gray-100">
+				<Card className="w-full py-2 border-2 border-muted">
 					<CardHeader className="relative flex items-center justify-center">
 						<Button
 							color="primary"
@@ -165,7 +165,7 @@ export default function CommunitySpace({
 			</div>
 			<div className="flex flex-grow gap-4 mt-6">
 				<div className="flex flex-col w-[40%] gap-6 overflow-y-auto shadow-sm rounded-xl">
-					<div className="w-full p-6 overflow-y-auto bg-white border-2 border-gray-100 shadow-sm rounded-xl">
+					<div className="w-full p-6 overflow-y-auto border-2 shadow-sm bg-content1 border-muted rounded-xl">
 						<h2 className="mb-4 text-xl font-bold">
 							Annonces de la communauté
 						</h2>
@@ -179,7 +179,7 @@ export default function CommunitySpace({
 							/>
 						))}
 					</div>
-					<div className="w-full p-6 overflow-y-auto bg-white border-2 border-gray-100 shadow-sm rounded-xl">
+					<div className="w-full p-6 overflow-y-auto border-2 shadow-sm bg-content1 border-muted rounded-xl">
 						<h2 className="mb-4 text-xl font-bold">
 							Salles communautaire
 						</h2>

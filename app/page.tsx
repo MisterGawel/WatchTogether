@@ -184,7 +184,7 @@ export default function Home() {
 										}
 										classNames={{
 											inputWrapper:
-												'!rounded-lg bg-gray-200',
+												'!rounded-lg bg-content1 text-foreground',
 										}}
 										className="h-12"
 									/>
