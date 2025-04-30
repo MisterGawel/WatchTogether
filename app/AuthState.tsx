@@ -17,10 +17,12 @@ import {
 import { FaUser, FaUsers } from 'react-icons/fa';
 import { LogOut } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
+import { BsFillCameraVideoFill } from 'react-icons/bs';
 
 const items = [
 	{ title: 'Profil', url: '/profile', icon: FaUser },
 	{ title: 'Communautés', url: '/communities', icon: FaUsers },
+	{ title: 'Rooms', url: '/rooms', icon: BsFillCameraVideoFill },
 ];
 
 export function AuthState() {
@@ -102,6 +104,7 @@ export function AuthState() {
 					{items.map((it, i) => (
 						<DropdownMenuItem
 							key={i}
+							className="cursor-pointer"
 							onSelect={() => router.push(it.url)}
 						>
 							<it.icon className="mr-2" /> {it.title}
@@ -114,6 +117,7 @@ export function AuthState() {
 						auth.signOut();
 						router.refresh();
 					}}
+					className="cursor-pointer"
 				>
 					<LogOut className="mr-2 text-danger" /> Se déconnecter
 				</DropdownMenuItem>
