@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { FaUsers } from 'react-icons/fa';
 import ChatCommu from './Chat';
 import { BsFillMegaphoneFill } from 'react-icons/bs';
 import { Card, CardHeader, Link } from '@heroui/react';
@@ -13,16 +12,25 @@ import { useRouter } from 'next/navigation';
 import CardRoom from './Room';
 import CardAnnonce from './Announce';
 import CommunityMembers from './Member';
+import { MdDelete } from 'react-icons/md';
+
+interface Room {
+	admin: string;
+	community: string;
+	createdAt: string;
+	name: string;
+	id: string;
+}
 
 export default function CommunitySpace({
 	communityId,
 }: {
 	communityId: string;
 }) {
-	const [rooms, setRoom] = useState([]);
+	const [rooms, setRoom] = useState<Room[]>([]);
 	const [communityName, setCommunityName] = useState('');
 	const [annonces, setAnnonces] = useState([]);
-	const [communities, setCommunities] = useState({});
+	const [communities, setCommunities] = useState<Record<string, string>>({});
 
 	const DonnéesBase = async () => {
 		try {
@@ -37,7 +45,7 @@ export default function CommunitySpace({
 					const roomsId = data.rooms || [];
 
 					// Charge les rooms
-					const roomPromises = roomsId.map(async (roomId) => {
+					const roomPromises = roomsId.map(async (roomId: string) => {
 						const roomRef = doc(db, 'rooms', roomId);
 						const roomSnapshot = await getDoc(roomRef);
 						return roomSnapshot.exists()
@@ -83,13 +91,14 @@ export default function CommunitySpace({
 
 	useEffect(() => {
 		DonnéesBase();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const isAdmin = (communityId) => {
+	const isAdmin = (communityId: string): boolean => {
 		return communities[communityId] === 'admin';
 	};
 
-	let role = 'admin';
+	let role = 'member';
 	if (isAdmin(communityId)) {
 		role = 'admin';
 	}
@@ -111,39 +120,46 @@ export default function CommunitySpace({
 						</Button>
 						<h1 className="text-xl font-bold">{communityName}</h1>
 						<div className="absolute flex gap-2 right-4">
-							<Button
-								color="primary"
-								isIconOnly
-								size="md"
-								onPress={() => {
-									router.push(
-										`/communities/${communityId}/create-announce`
-									);
-								}}
-							>
-								<BsFillMegaphoneFill />
-							</Button>
-							<Button
-								color="primary"
-								isIconOnly
-								size="md"
-								onPress={() => {
-									router.push(
-										`/communities/${communityId}/create-room`
-									);
-								}}
-							>
-								<BsFillCameraVideoFill />
-							</Button>
-							<Button
-								color="primary"
-								isIconOnly
-								size="md"
-								as={Link}
-								href={`/communities/members`}
-							>
-								<FaUsers />
-							</Button>
+							{role === 'admin' && (
+								<>
+									<Button
+										color="primary"
+										isIconOnly
+										size="md"
+										onPress={() => {
+											router.push(
+												`/communities/${communityId}/create-announce`
+											);
+										}}
+									>
+										<BsFillMegaphoneFill />
+									</Button>
+									<Button
+										color="primary"
+										isIconOnly
+										size="md"
+										onPress={() => {
+											router.push(
+												`/communities/${communityId}/create-room`
+											);
+										}}
+									>
+										<BsFillCameraVideoFill />
+									</Button>
+									<Button
+										color="danger"
+										isIconOnly
+										size="md"
+										onPress={() => {
+											router.push(
+												`/communities/${communityId}/delete-community`
+											);
+										}}
+									>
+										<MdDelete className="text-xl" />
+									</Button>
+								</>
+							)}
 						</div>
 					</CardHeader>
 				</Card>
@@ -165,7 +181,9 @@ export default function CommunitySpace({
 						))}
 					</div>
 					<div className="w-full p-6 overflow-y-auto bg-white border-2 border-gray-100 shadow-sm rounded-xl">
-						<h2 className="mb-4 text-xl font-bold">Salles</h2>
+						<h2 className="mb-4 text-xl font-bold">
+							Salles communautaire
+						</h2>
 						<div className="flex flex-col w-full gap-4">
 							{rooms.map((room) => (
 								<CardRoom
@@ -179,11 +197,11 @@ export default function CommunitySpace({
 					</div>
 				</div>
 
-				<div className="w-[40%]">
+				<div className="w-[35%]">
 					<ChatCommu roomId={communityId} Role={role} />
 				</div>
 
-				<div className="w-[20%]">
+				<div className="w-[25%]">
 					<CommunityMembers
 						communityId={communityId}
 						Role={role}

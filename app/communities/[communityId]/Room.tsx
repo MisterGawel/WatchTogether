@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 export default function CardRoom({ role, room, communityId }) {
 	const image = 'https://heroui.com/images/hero-card-complete.jpeg';
 	const router = useRouter();
+	console.log(room);
 
 	return (
 		<div className="flex flex-col items-start">
