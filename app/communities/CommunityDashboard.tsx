@@ -56,16 +56,16 @@ export function CommunityDashboard({
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ delay: i * 0.1, duration: 0.4 }}
 					>
-						<Card className="relative flex flex-col justify-center h-full px-8 text-center transition border-b-2 border-gray-200 shadow bg-gradient-to-br from-white to-gray-50 rounded-2xl hover:shadow-lg aspect-square">
-							<Divider className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-secondary rounded-t-2xl" />
+						<Card className="relative flex flex-col justify-center h-full px-8 text-center transition border-b-2 border-gray-200 shadow border-b-background bg-gradient-to-br from-background to-secondary rounded-2xl hover:shadow-lg aspect-square">
+							<Divider className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-primary rounded-t-2xl" />
 							<div className="absolute flex items-center justify-center w-12 h-12 mx-auto mb-4 transform -translate-x-1/2 bg-white rounded-full shadow-md text-primary top-8 left-1/2">
 								<c.icon className="w-6 h-6" />
 							</div>
 							<div className="">
-								<h3 className="mb-2 text-2xl font-semibold text-gray-800">
+								<h3 className="mb-2 text-2xl font-semibold text-foreground">
 									{c.title}
 								</h3>
-								<p className="mb-4 text-gray-500">
+								<p className="mb-4 text-foreground opacity-70">
 									{c.subtitle}
 								</p>
 							</div>

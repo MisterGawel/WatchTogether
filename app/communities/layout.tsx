@@ -21,7 +21,7 @@ export default function ListsLayout({
 	modal: React.ReactNode;
 }) {
 	return (
-		<div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-indigo-100">
+		<div className="relative min-h-screen overflow-hidden ">
 			<motion.div
 				className="absolute top-[-150px] left-[-100px] w-[400px] h-[400px] bg-indigo-400 opacity-40 rounded-full blur-2xl"
 				animate={{ y: [0, 20, 0], x: [0, 10, 0] }}
