@@ -1,5 +1,4 @@
 'use client';
-export { isAdmin };
 import { useState, useEffect } from 'react';
 import ChatCommu from './Chat';
 import { BsFillMegaphoneFill } from 'react-icons/bs';

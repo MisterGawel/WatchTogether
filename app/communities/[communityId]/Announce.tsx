@@ -15,7 +15,6 @@ export default function CardAnnonce({
 	index,
 }: Announce) {
 	const router = useRouter();
-	console.log('Annonce:', announce);
 	return (
 		<div className="mb-4">
 			<Card className="p-4 shadow-none bg-background">

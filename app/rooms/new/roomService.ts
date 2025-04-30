@@ -28,8 +28,6 @@ export const createRoom = async (
 			createdAt: serverTimestamp(),
 		});
 
-		console.log('Room créée avec ID :', docRef.id);
-
 		// Si une communauté est fournie, on l'associe
 		if (communityID) {
 			const communityRef = doc(db, 'communities', communityID);
