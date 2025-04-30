@@ -5,8 +5,8 @@ import { RiCommunityFill } from 'react-icons/ri';
 import { Card, Divider } from '@heroui/react';
 import { Button } from '@heroui/button';
 import { motion } from 'framer-motion';
-import Link from 'next/link';
 import type { User } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 interface DashboardProps {
 	user?: User | null;
@@ -43,6 +43,8 @@ export function CommunityDashboard({
 		},
 	];
 
+	const router = useRouter();
+
 	return (
 		<div className="flex flex-col items-center mb-12">
 			<div className="grid items-stretch w-full max-w-5xl gap-8 md:grid-cols-3">
@@ -71,8 +73,13 @@ export function CommunityDashboard({
 								className="absolute transform -translate-x-1/2 bottom-10 left-1/2"
 								color="primary"
 								size="md"
-								href={c.href}
-								as={Link}
+								onPress={() => {
+									if (user) {
+										router.push(c.href);
+									} else {
+										router.push('/auth/login');
+									}
+								}}
 							>
 								{c.label}
 							</Button>

@@ -15,10 +15,10 @@ import {
 
 export default function ListsLayout({
 	children,
-	modal,
+	sub_modal,
 }: {
 	children: React.ReactNode;
-	modal: React.ReactNode;
+	sub_modal: React.ReactNode;
 }) {
 	return (
 		<div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-indigo-100">
@@ -126,7 +126,7 @@ export default function ListsLayout({
 
 			<div className="relative z-10">
 				{children}
-				{modal}
+				{sub_modal}
 			</div>
 		</div>
 	);
