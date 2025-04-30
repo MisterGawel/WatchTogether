@@ -1,4 +1,5 @@
 'use client';
+export { isAdmin };
 import { useState, useEffect } from 'react';
 import ChatCommu from './Chat';
 import { BsFillMegaphoneFill } from 'react-icons/bs';
@@ -13,7 +14,13 @@ import CardRoom from './Room';
 import CardAnnonce from './Announce';
 import CommunityMembers from './Member';
 import { MdDelete } from 'react-icons/md';
-import type { Room } from '@/lib/types';
+interface Room {
+	admin: string;
+	community: string;
+	createdAt: string;
+	name: string;
+	id: string;
+}
 
 export default function CommunitySpace({
 	communityId,
