@@ -7,11 +7,13 @@ import { Button } from '@heroui/button';
 import { db } from '../../firebase';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { Chip } from '@heroui/chip';
+import type { User } from '@/lib/types';
 
-const getUsersInCommunity = async (communityId) => {
+const getUsersInCommunity = async (communityId: string) => {
 	const usersRef = collection(db, 'users');
 	const snapshot = await getDocs(usersRef);
 
+	// @ts-expect-error snapshot
 	const usersInCommunity = [];
 
 	snapshot.forEach((docSnap) => {
@@ -21,11 +23,18 @@ const getUsersInCommunity = async (communityId) => {
 		}
 	});
 
+	// @ts-expect-error usersInCommunity
 	return usersInCommunity;
 };
 
-export default function CommunityMembers({ communityId, Role }) {
-	const [members, setMembers] = useState([]);
+export default function CommunityMembers({
+	communityId,
+	Role,
+}: {
+	communityId: string;
+	Role?: string;
+}) {
+	const [members, setMembers] = useState<User[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	const fetchMembers = async () => {
@@ -42,7 +51,7 @@ export default function CommunityMembers({ communityId, Role }) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [communityId]);
 
-	const promoteToAdmin = async (userId) => {
+	const promoteToAdmin = async (userId: string) => {
 		const userRef = doc(db, 'users', userId);
 		const userSnapshot = await getDoc(userRef);
 

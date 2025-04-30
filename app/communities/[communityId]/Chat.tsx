@@ -15,6 +15,7 @@ import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import { db, auth } from '@/app/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import type { Message } from '@/lib/types';
 
 export default function ChatCommu({
 	Role,
@@ -23,7 +24,7 @@ export default function ChatCommu({
 	Role: string;
 	roomId: string;
 }) {
-	const [messages, setMessages] = useState([]);
+	const [messages, setMessages] = useState<Message[]>([]);
 	const [newMessage, setNewMessage] = useState('');
 	const [expandedMessage, setExpandedMessage] = useState(null);
 	const [userName, setUserName] = useState(''); // Nouvel état pour le nom de l'utilisateur
@@ -36,6 +37,8 @@ export default function ChatCommu({
 				id: doc.id,
 				...doc.data(),
 			}));
+
+			// @ts-expect-error loadedMessages
 			setMessages(loadedMessages);
 		});
 
@@ -83,6 +86,8 @@ export default function ChatCommu({
 	};
 
 	const MAX_LENGTH = 50;
+
+	// @ts-expect-error expandedMessage
 	const toggleExpandMessage = (id) => {
 		setExpandedMessage(expandedMessage === id ? null : id);
 	};
@@ -110,7 +115,9 @@ export default function ChatCommu({
 									size="sm"
 									variant="light"
 									color="danger"
-									onPress={() => deleteMessage(msg.id)}
+									onPress={() =>
+										msg.id && deleteMessage(msg.id)
+									}
 									className="absolute text-lg leading-none top-1 right-1"
 								>
 									×
