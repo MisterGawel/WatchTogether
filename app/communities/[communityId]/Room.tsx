@@ -4,11 +4,36 @@ import { BsFillArrowRightCircleFill } from 'react-icons/bs';
 import { FaUsers } from 'react-icons/fa';
 import { Card, CardHeader, CardBody, Image, Button } from '@heroui/react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { db } from '@/app/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 export default function CardRoom({ role, room, communityId }) {
 	const image = 'https://heroui.com/images/hero-card-complete.jpeg';
 	const router = useRouter();
 	console.log(room);
+	const [nbMembreRoom, setNbMembreRoom] = useState(0);
+
+	useEffect(() => {
+		if (!room?.id) return;
+
+		const presenceRef = collection(db, 'presence');
+		const q = query(presenceRef, where('roomId', '==', room.id));
+
+		const unsubscribe = onSnapshot(q, (snapshot) => {
+			const now = Date.now();
+			const THRESHOLD = 30_000; // 30 secondes
+
+			const activeUsers = snapshot.docs.filter((doc) => {
+				const data = doc.data();
+				return now - data.lastSeen < THRESHOLD;
+			});
+
+			setNbMembreRoom(activeUsers.length);
+		});
+
+		return () => unsubscribe();
+	}, [room.id]);
 
 	return (
 		<div className="flex flex-col items-start">
@@ -26,7 +51,7 @@ export default function CardRoom({ role, room, communityId }) {
 					</div>
 					<div className="flex items-center gap-5">
 						<div className="flex items-center gap-2 text-gray-500">
-							<span className="text-sm font-medium">45</span>
+							<span className="text-sm font-medium">{nbMembreRoom}</span>
 							<FaUsers />
 						</div>
 						<div className="flex items-center gap-2 text-gray-500">

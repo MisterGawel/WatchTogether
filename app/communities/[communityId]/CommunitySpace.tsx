@@ -1,4 +1,5 @@
 'use client';
+export { isAdmin };
 import { useState, useEffect } from 'react';
 import ChatCommu from './Chat';
 import { BsFillMegaphoneFill } from 'react-icons/bs';
@@ -13,7 +14,6 @@ import CardRoom from './Room';
 import CardAnnonce from './Announce';
 import CommunityMembers from './Member';
 import { MdDelete } from 'react-icons/md';
-
 interface Room {
 	admin: string;
 	community: string;

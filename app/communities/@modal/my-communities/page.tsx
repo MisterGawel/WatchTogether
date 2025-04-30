@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card } from '@heroui/react';
+import { Card, Chip } from '@heroui/react';
 import { motion } from 'framer-motion';
 import { db, auth } from '@/app/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
@@ -131,6 +131,14 @@ export default function AllCommunitiesModal() {
 														<p className="mt-2 text-sm text-gray-600 line-clamp-3">
 															{commu.description}
 														</p>
+														<Chip
+															className={`${userCommunities[commu.id] === 'admin' ? 'bg-green-100 text-green-800' : 'bg-gray-300 text-gray-800'} font-bold rounded-lg`}
+															size="sm"
+														>
+															{userCommunities[commu.id] === 'admin'
+																? 'Admin'
+																: 'Membre'}
+														</Chip>
 													</div>
 												</Card>
 											</motion.div>

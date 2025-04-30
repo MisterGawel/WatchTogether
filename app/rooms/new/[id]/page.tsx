@@ -6,7 +6,7 @@ import {
 	doc,
 	addDoc,
 	deleteDoc,
-	writeBatch,
+	setDoc,
 	collection,
 	getDocs,
 	onSnapshot,
@@ -38,6 +38,22 @@ export default function RoomPage({ params }: { params: Promise<any> }) {
 		handleDeleteAllLinks,
 	} = useRoomActions(resolvedParams, roomData, currentUser);
 
+	//Code pour le nombre de perssone dans la room (ALEXIS)
+	useEffect(() => {
+		if (!currentUser || !resolvedParams?.id) return;
+	
+		const interval = setInterval(() => {
+			setDoc(doc(db, 'presence', currentUser.uid), {
+				userId: currentUser.uid,
+				roomId: resolvedParams.id,
+				lastSeen: Date.now()
+			});
+		}, 10000); // ping toutes les 10s
+	
+		return () => clearInterval(interval);
+	}, [currentUser, resolvedParams?.id]);
+
+	
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, (user) => {
 			if (user) {
