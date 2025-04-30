@@ -13,14 +13,7 @@ import CardRoom from './Room';
 import CardAnnonce from './Announce';
 import CommunityMembers from './Member';
 import { MdDelete } from 'react-icons/md';
-
-interface Room {
-	admin: string;
-	community: string;
-	createdAt: string;
-	name: string;
-	id: string;
-}
+import type { Room } from '@/lib/types';
 
 export default function CommunitySpace({
 	communityId,

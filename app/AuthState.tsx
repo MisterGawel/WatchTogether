@@ -92,6 +92,7 @@ export function AuthState() {
 			>
 				<DropdownMenuLabel className="flex items-center gap-2 px-2 py-1">
 					<Avatar className="w-8 h-8 rounded-lg">
+						{/* eslint-disable-next-line @next/next/no-img-element */}
 						<img src={user.photoURL || ''} alt="avatar" />
 					</Avatar>
 					<span className="truncate">{user.email}</span>

@@ -15,11 +15,17 @@ import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import { db, auth } from '@/app/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-export default function ChatCommu({ Role, roomId }) {
+
+export default function ChatCommu({
+	Role,
+	roomId,
+}: {
+	Role: string;
+	roomId: string;
+}) {
 	const [messages, setMessages] = useState([]);
 	const [newMessage, setNewMessage] = useState('');
 	const [expandedMessage, setExpandedMessage] = useState(null);
-	const User1 = 'Alexis'; // Remplace par l'utilisateur actuel
 	const [userName, setUserName] = useState(''); // Nouvel état pour le nom de l'utilisateur
 	const messagesRef = collection(db, `chats/${roomId}/messages`);
 
@@ -33,7 +39,8 @@ export default function ChatCommu({ Role, roomId }) {
 			setMessages(loadedMessages);
 		});
 
-		return () => unsubscribe(); // Nettoie l'écouteur quand le composant est démonté
+		return () => unsubscribe();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [roomId]);
 
 	useEffect(() => {
@@ -69,7 +76,7 @@ export default function ChatCommu({ Role, roomId }) {
 		}
 	};
 
-	const deleteMessage = async (id) => {
+	const deleteMessage = async (id: string) => {
 		if (Role === 'admin') {
 			await deleteDoc(doc(db, `chats/${roomId}/messages`, id));
 		}

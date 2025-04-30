@@ -2,10 +2,19 @@
 import { MdDelete } from 'react-icons/md';
 import { BsFillArrowRightCircleFill } from 'react-icons/bs';
 import { FaUsers } from 'react-icons/fa';
-import { Card, CardHeader, CardBody, Image, Button } from '@heroui/react';
+import { Card, CardBody, Image, Button } from '@heroui/react';
 import { useRouter } from 'next/navigation';
+import type { Room } from '@/lib/types';
 
-export default function CardRoom({ role, room, communityId }) {
+export default function CardRoom({
+	role,
+	room,
+	communityId,
+}: {
+	role: string;
+	room: Room;
+	communityId: string;
+}) {
 	const image = 'https://heroui.com/images/hero-card-complete.jpeg';
 	const router = useRouter();
 	console.log(room);

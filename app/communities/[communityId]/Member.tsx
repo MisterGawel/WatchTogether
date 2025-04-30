@@ -38,6 +38,8 @@ export default function CommunityMembers({ communityId, Role }) {
 		if (communityId) {
 			fetchMembers();
 		}
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [communityId]);
 
 	const promoteToAdmin = async (userId) => {

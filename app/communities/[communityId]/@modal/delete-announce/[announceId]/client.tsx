@@ -27,7 +27,7 @@ export default function DeleteRoomClient({
 					index < currentAnnonces.length
 				) {
 					const updatedAnnonces = currentAnnonces.filter(
-						(_, idx) => idx !== index
+						(_: number, idx: number) => idx !== index
 					);
 					await updateDoc(communityDocRef, {
 						announcements: updatedAnnonces,

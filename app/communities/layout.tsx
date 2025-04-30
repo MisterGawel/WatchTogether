@@ -18,7 +18,7 @@ export default function ListsLayout({
 	modal,
 }: {
 	children: React.ReactNode;
-	modal?: React.ReactNode;
+	modal: React.ReactNode;
 }) {
 	return (
 		<div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-indigo-100">
