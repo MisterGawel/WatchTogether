@@ -9,6 +9,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/modal';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function AllCommunitiesModal() {
 	const [loading, setLoading] = useState(false);
@@ -114,13 +115,12 @@ export default function AllCommunitiesModal() {
 													duration: 0.3,
 													ease: 'easeOut',
 												}}
-												onClick={() =>
-													router.push(
-														`/communities/${commu.id}`
-													)
-												}
 											>
-												<Card className="relative p-4 transition-all duration-300 border border-gray-200 shadow-sm cursor-pointer group min-h-32 rounded-2xl hover:shadow-lg hover:border-gray-300">
+												<Card
+													as={Link}
+													href={`/communities/${commu.id}`}
+													className="relative p-4 transition-all duration-300 border border-gray-200 shadow-sm cursor-pointer group min-h-32 rounded-2xl hover:shadow-lg hover:border-gray-300"
+												>
 													<div className="absolute inset-0 z-50 flex items-center justify-center text-sm font-medium text-white transition-opacity duration-300 bg-black opacity-0 bg-opacity-70 rounded-2xl group-hover:opacity-100">
 														Accéder à la communauté
 													</div>
