@@ -58,8 +58,8 @@ const WrapperPlayer = ({ link }) => {
 			onMouseEnter={() => setIsHovered(true)}
 			style={{
 				position: 'relative',
-				width: '640px', // Taille fixe
-				height: '360px', // Taille fixe
+				width: '100%', // Taille fixe
+				height: '100%', // Taille fixe
 				overflow: 'hidden',
 				borderRadius: '8px', // Coins arrondis pour un rendu sympa
 			}}

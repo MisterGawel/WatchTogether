@@ -21,6 +21,7 @@ import { Loader2 } from 'lucide-react';
 const items = [
 	{ title: 'Mon profil', url: '/profile', icon: FaUser },
 	{ title: 'Mes communautés', url: '/communaute', icon: FaUsers },
+	{ title: 'Mes rooms', url: '/rooms/new', icon: FaUsers },
 ];
 
 export function AuthState() {

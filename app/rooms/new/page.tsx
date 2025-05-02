@@ -1,110 +1,151 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { db, auth } from '@/app/firebase'; // 🔥 Import Firestore et auth
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { Card, Image } from '@heroui/react';
+import { motion } from 'framer-motion';
+import { db, auth } from '../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { createRoom } from './roomService';
 
-export default function Page() {
-	const [roomName, setRoomName] = useState('');
-	const [currentUser, setCurrentUser] = useState<User | null>(null);
-	const [loading, setLoading] = useState(true);
-	const router = useRouter();
+interface RoomInfo {
+    id: string;
+    name: string;
+}
 
-	// Gestion de l'authentification
-	useEffect(() => {
-		const unsubscribe = onAuthStateChanged(auth, (user) => {
-			setCurrentUser(user);
-			setLoading(false);
+export default function UserRoomsPage() {
+    const [rooms, setRooms] = useState<RoomInfo[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [user, setUser] = useState<User | null>(null);
+    const router = useRouter();
+    const roomImage = 'https://heroui.com/images/hero-card-complete.jpeg';
 
-			// Rediriger si non connecté
-			if (!user) {
-				router.push('/login'); // Adaptez cette route selon votre configuration
-			}
-		});
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser: User | null) => {
+            if (currentUser) {
+                setUser(currentUser);
+                fetchUserRooms(currentUser.uid);
+            } else {
+                setUser(null);
+                setRooms([]);
+            }
+        });
+        return () => unsubscribe();
+    }, []);
 
-		return () => unsubscribe();
-	}, [router]);
+    const fetchUserRooms = async (userId: string) => {
+        setLoading(true);
+        try {
+            const userRef = doc(db, 'users', userId);
+            const userSnap = await getDoc(userRef);
+            
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                const roomsMap = userData.rooms || {};
+                const roomIds = Object.keys(roomsMap);
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
+                const roomsWithNames = await Promise.all(
+                    roomIds.map(async (roomId) => {
+                        const roomRef = doc(db, 'rooms', roomId);
+                        const roomSnap = await getDoc(roomRef);
+                        if (roomSnap.exists()) {
+                            return {
+                                id: roomId,
+                                name: roomSnap.data().name || 'Sans nom'
+                            };
+                        }
+                        return {
+                            id: roomId,
+                            name: 'Room inconnue'
+                        };
+                    })
+                );
 
-		if (!currentUser) {
-			alert('Vous devez être connecté pour créer une room');
-			return;
-		}
+                setRooms(roomsWithNames);
+            }
+        } catch (error) {
+            console.error('Erreur lors de la récupération des rooms:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-		try {
-			const communityID = 'UIyd1HlGNJACSPUNP2pl'; // Vous pourriez aussi rendre ceci dynamique
-			const roomId = await createRoom(
-				roomName,
-				communityID,
-				currentUser.uid
-			);
-			router.push(`/rooms/new/${roomId}`);
-		} catch (error) {
-			console.error('Erreur lors de la création de la room:', error);
-			alert('Une erreur est survenue lors de la création de la room');
-		}
-	};
+    const handleRoomClick = (roomId: string) => {
+        router.push(`/rooms/new/${roomId}`);
+    };
 
-	if (loading) {
-		return (
-			<div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-				<div className="w-12 h-12 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
-			</div>
-		);
-	}
+    return (
+        <div className="min-h-screen px-4 py-10 bg-gray-50">
+            <div className="mx-auto mb-10 max-w-7xl">
+                <h1 className="text-4xl font-bold text-gray-800">
+                    <center>Mes Rooms</center>
+                </h1>
+                
+            </div>
 
-	return (
-		<div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-			<form
-				onSubmit={handleSubmit}
-				className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800 w-96"
-			>
-				<h1 className="mb-4 text-xl font-bold text-center text-gray-700 dark:text-gray-300">
-					Créer une nouvelle Room
-				</h1>
-
-				{currentUser && (
-					<p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-						Connecté en tant que:{' '}
-						{currentUser.email || currentUser.uid}
-					</p>
-				)}
-
-				<label
-					htmlFor="input"
-					className="block mb-2 text-lg font-medium text-gray-700 dark:text-gray-300"
-				>
-					Nom de la Room:
-				</label>
-				<input
-					id="input"
-					type="text"
-					value={roomName}
-					onChange={(e) => setRoomName(e.target.value)}
-					className="w-full p-2 text-black bg-white border border-gray-300 rounded-md dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:text-white dark:bg-gray-700"
-					placeholder="Entrez le nom de la room"
-					required
-				/>
-
-				<button
-					type="submit"
-					className="w-full py-2 mt-4 text-white transition bg-blue-500 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-					disabled={!currentUser}
-				>
-					Créer la Room
-				</button>
-
-				{!currentUser && (
-					<p className="mt-2 text-sm text-red-500">
-						Vous devez être connecté pour créer une room
-					</p>
-				)}
-			</form>
-		</div>
-	);
+            {loading ? (
+                <div className="flex justify-center mt-20">
+                    <div className="text-center">
+                        <div className="w-12 h-12 mx-auto mb-4 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+                        <p className="text-gray-600">
+                            Chargement de vos rooms...
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <div className="grid gap-6 mx-auto md:grid-cols-2 lg:grid-cols-3 max-w-7xl">
+                    {rooms.length > 0 ? (
+                        rooms.map((room, index) => (
+                            <motion.div
+                                key={room.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{
+                                    delay: index * 0.05,
+                                    duration: 0.3,
+                                    ease: 'easeOut',
+                                }}
+                                className="relative cursor-pointer"
+                                onClick={() => handleRoomClick(room.id)}
+                            >
+                                <Card className="overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm rounded-2xl hover:shadow-lg hover:border-gray-300 p-0 h-full">
+                                    <div className="relative h-full">
+                                        {/* Image de fond */}
+                                        <div className="opacity-90 h-full">
+                                            <Image
+                                                src={roomImage}
+                                                alt={`Image de ${room.name}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="absolute top-3 left-[5%]  bg-opacity-50 text-white px-2 py-1 rounded-lg">
+											<h2 className="text-2xl font-semibold truncate">  
+												{room.name}
+											</h2>
+										</div>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        ))
+                    ) : (
+                        <div className="col-span-3 py-10 text-center">
+                            <p className="text-gray-600">
+                                {user 
+                                    ? "Vous n'avez aucune room pour le moment"
+                                    : "Connectez-vous pour voir vos rooms"}
+                            </p>
+                            {!user && (
+                                <button 
+                                    onClick={() => router.push('/login')}
+                                    className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                >
+                                    Se connecter
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
 }
