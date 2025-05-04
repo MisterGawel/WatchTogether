@@ -29,9 +29,23 @@ export const createRoom = async (
 			createdAt: any;
 			admin?: string;
 			community?: string;
+			currentVideo: {
+				url: string;
+				playing: boolean;
+				timestamp: number;
+				lastUpdate: any;
+				forcedBy: string | null;
+			};
 		} = {
 			name: roomName,
 			createdAt: serverTimestamp(),
+			currentVideo: {
+				url: '',
+				playing: false,
+				timestamp: 0,
+				lastUpdate: serverTimestamp(),
+				forcedBy: null,
+			},
 		};
 
 		if (idAdmin) roomData.admin = idAdmin;
@@ -40,7 +54,7 @@ export const createRoom = async (
 		// 3. Créer la room dans Firestore
 		await setDoc(roomRef, roomData);
 
-		// 4. Si user connecté, l'associer à la room
+		// 4. Associer l'utilisateur si connecté
 		if (idAdmin) {
 			const userRef = doc(db, 'users', idAdmin);
 			const userSnap = await getDoc(userRef);
@@ -51,7 +65,7 @@ export const createRoom = async (
 			}
 		}
 
-		// 5. Si communauté spécifiée, associer la room à la communauté
+		// 5. Associer à la communauté si précisé
 		if (communityID) {
 			const communityRef = doc(db, 'communities', communityID);
 			const communitySnap = await getDoc(communityRef);
@@ -60,7 +74,6 @@ export const createRoom = async (
 					rooms: arrayUnion(roomId),
 				});
 			} else {
-				// Crée la communauté si elle n'existe pas encore
 				await setDoc(communityRef, {
 					rooms: [roomId],
 				});
@@ -70,6 +83,6 @@ export const createRoom = async (
 		return roomId;
 	} catch (err) {
 		console.error('Erreur Firebase :', err);
-		throw new Error('Échec de la création de la room.');
+		throw new Error("Échec de la création de la room.");
 	}
 };

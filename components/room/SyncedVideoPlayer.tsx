@@ -32,29 +32,72 @@ export default function SyncedVideoPlayer({ roomId, userId, isAdmin }: Props) {
 		}
 	}, [videoState]);
 
-	const handlePlay = () => {
-		if (internalSeeking) return;
-		updateVideoState({
-			playing: true,
-			timestamp: playerRef.current?.getCurrentTime() ?? 0,
-		});
-	};
 
-	const handlePause = () => {
-		if (internalSeeking) return;
-		updateVideoState({
-			playing: false,
-			timestamp: playerRef.current?.getCurrentTime() ?? 0,
-		});
-	};
+    const TOLERANCE = 1.5; // Seuil de désynchronisation en secondes
 
-	const handleSeek = (seconds: number) => {
-		setInternalSeeking(true);
-		updateVideoState({
-			timestamp: seconds,
-		});
-		setTimeout(() => setInternalSeeking(false), 500);
-	};
+	const correctDesyncIfNeeded = () => {
+        if (!playerRef.current || !videoState) return;
+        const current = playerRef.current.getCurrentTime();
+        const target = getSyncedTime();
+        const desync = Math.abs(current - target);
+    
+        if (desync > TOLERANCE) {
+            playerRef.current.seekTo(target);
+        }
+    };
+    
+    const handlePlay = () => {
+        if (!isAdmin || internalSeeking) {
+            correctDesyncIfNeeded();
+            return;
+        }
+        updateVideoState({
+            playing: true,
+            timestamp: playerRef.current?.getCurrentTime() ?? 0,
+        });
+    };
+    
+    const handlePause = () => {
+        if (!isAdmin || internalSeeking) {
+            correctDesyncIfNeeded();
+            return;
+        }
+        updateVideoState({
+            playing: false,
+            timestamp: playerRef.current?.getCurrentTime() ?? 0,
+        });
+    };
+    
+    const handleSeek = (seconds: number) => {
+        if (!isAdmin) {
+            correctDesyncIfNeeded();
+            return;
+        }
+        setInternalSeeking(true);
+        updateVideoState({
+            timestamp: seconds,
+        });
+        setTimeout(() => setInternalSeeking(false), 500);
+    };
+    
+
+    const handleEnded = async () => {
+        if (!roomId) return;
+    
+        try {
+            const res = await fetch(`/api/rooms/${roomId}/next-video`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: userId,
+                }),
+            });
+        } catch (err) {
+            console.error('Erreur lors du passage à la vidéo suivante:', err);
+        }
+    };
+    
+    
 
 	if (!videoState?.url) {
 		return <div className="text-center py-8 text-gray-500">Aucune vidéo en cours</div>;
@@ -66,12 +109,14 @@ export default function SyncedVideoPlayer({ roomId, userId, isAdmin }: Props) {
 				ref={playerRef}
 				url={videoState.url}
 				playing={videoState.playing}
+                muted={true}
 				controls
 				width="100%"
 				height="100%"
 				onPlay={handlePlay}
 				onPause={handlePause}
 				onSeek={handleSeek}
+                onEnded={handleEnded}
 			/>
 		</div>
 	);

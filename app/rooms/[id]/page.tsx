@@ -8,10 +8,9 @@ import VideoQueue from '@/components/room/VideoQueue';
 import VideoHistory from '@/components/room/VideoHistory';
 import ChatRoomSocket from '@/components/room/ChatRoomSocket';
 import SearchBar from '@/components/room/SearchBar';
-import { auth } from '@/app/firebase';
+import { auth , db } from '@/app/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/app/firebase';
 
 export default function RoomPage({ params }: { params: Promise<{ id: string }> }) {
 	const { id: roomId } = use(params);
@@ -20,6 +19,7 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
 	const [currentUser, setCurrentUser] = useState<any>(null);
 	const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
+    // Vérification de l'état de connexion de l'utilisateur
 	useEffect(() => {
         const unsub = onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -43,10 +43,24 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
     }, []);
     
 
-	useEffect(() => {
-		const role = searchParams.get('role');
-		if (role === 'admin') setIsAdmin(true);
-	}, [searchParams]);
+    useEffect(() => {
+        if (!currentUser || !roomId) return;
+    
+        const checkAdmin = async () => {
+            try {
+                const roomRef = doc(db, 'rooms', roomId);
+                const snap = await getDoc(roomRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    setIsAdmin(data.admin === currentUser.uid);
+                }
+            } catch (err) {
+                console.error('Erreur vérification admin:', err);
+            }
+        };
+    
+        checkAdmin();
+    }, [currentUser, roomId]);
 
 	if (!currentUser) {
 		return (
@@ -55,6 +69,8 @@ export default function RoomPage({ params }: { params: Promise<{ id: string }> }
 			</div>
 		);
 	}
+
+    console.log('isAdmin:', isAdmin);
 
 	return (
 		<div className="grid grid-cols-1 lg:grid-cols-5 min-h-screen bg-gray-100 dark:bg-gray-900 gap-4 p-4">

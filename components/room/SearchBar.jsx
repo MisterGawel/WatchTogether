@@ -197,7 +197,7 @@ export default function SearchBar({ onSelect }) {
           >
             <option value="youtube">YouTube</option>
             <option value="twitch">Twitch</option>
-            <option value="dailymotion">Dailymotion</option>
+            {/*<option value="dailymotion">Dailymotion</option>*/}
           </select>
         </div>
       </div>

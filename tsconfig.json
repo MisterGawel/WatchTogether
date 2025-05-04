@@ -36,6 +36,6 @@
 		"app/firebase.js",
 		"app/players/youtube-player.jsx",
 		"tailwind.config.js"
-, "app/players/page.jsx"	],
+, "app/players/page.jsx", "app/players/wrapper-player.jsx", "app/players/dailymotion-player.jsx"	],
 	"exclude": ["node_modules"]
 }

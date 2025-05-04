@@ -1,17 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-	doc,
-	onSnapshot,
-	updateDoc,
-	serverTimestamp,
-	setDoc,
-} from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '@/app/firebase';
 
 type VideoState = {
 	url: string;
 	playing: boolean;
-	timestamp: number; // en secondes
+	timestamp: number;
 	lastUpdate: Date;
 	forcedBy?: string;
 };
@@ -23,37 +17,45 @@ export function useSyncedVideo(roomId: string) {
 	useEffect(() => {
 		if (!roomId) return;
 
-		const ref = doc(db, `rooms/${roomId}/currentVideo/now`);
-		const unsub = onSnapshot(ref, (snap) => {
-			if (!snap.exists()) return;
+		const roomRef = doc(db, 'rooms', roomId);
+		const unsub = onSnapshot(roomRef, (snap) => {
 			const data = snap.data();
+			const video = data?.currentVideo;
+
+			if (!video) return;
+
 			setVideoState({
-				url: data.url,
-				playing: data.playing,
-				timestamp: data.timestamp,
-				lastUpdate: data.lastUpdate?.toDate?.() ?? new Date(),
-				forcedBy: data.forcedBy,
+				url: video.url,
+				playing: video.playing,
+				timestamp: video.timestamp,
+				lastUpdate: video.lastUpdate?.toDate?.() ?? new Date(),
+				forcedBy: video.forcedBy,
 			});
 		});
 		return () => unsub();
 	}, [roomId]);
 
 	const updateVideoState = async (newState: Partial<VideoState>) => {
-		const ref = doc(db, `rooms/${roomId}/currentVideo/now`);
-		await updateDoc(ref, {
-			...newState,
-			lastUpdate: serverTimestamp(),
+		const roomRef = doc(db, 'rooms', roomId);
+		await updateDoc(roomRef, {
+			currentVideo: {
+				...videoState,
+				...newState,
+				lastUpdate: serverTimestamp(),
+			},
 		});
 	};
 
 	const forceNewVideo = async (url: string, userId: string) => {
-		const ref = doc(db, `rooms/${roomId}/currentVideo/now`);
-		await setDoc(ref, {
-			url,
-			playing: true,
-			timestamp: 0,
-			lastUpdate: serverTimestamp(),
-			forcedBy: userId,
+		const roomRef = doc(db, 'rooms', roomId);
+		await updateDoc(roomRef, {
+			currentVideo: {
+				url,
+				playing: true,
+				timestamp: 0,
+				lastUpdate: serverTimestamp(),
+				forcedBy: userId,
+			},
 		});
 	};
 
