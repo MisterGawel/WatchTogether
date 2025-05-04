@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createRoom } from '../rooms/new/roomService';
 import { Card, Button, Input } from '@heroui/react';
 import { getAuth } from 'firebase/auth';
 
@@ -37,7 +36,6 @@ export default function InputRoom({ role, commuID }) {
         }
 
         try {
-            const roomId = await createRoom(roomName, communityID, currentUserId);
             //router.push(`/rooms/new/${roomId}`);
         } catch (error) {
             console.error('Erreur création room:', error);

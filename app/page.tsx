@@ -1,4 +1,5 @@
 'use client';
+
 import type React from 'react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -8,25 +9,29 @@ import { Button } from '@heroui/button';
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import { useRouter } from 'next/navigation';
-import { createRoom } from './rooms/new/roomService';
+import { createRoom } from '@/lib/createRoom';
+import { auth } from '@/app/firebase';
+
 
 export default function Home() {
 	const [roomId, setRoomId] = useState('');
 	const router = useRouter();
+
 	const handleCreateRoom = async (e: React.FormEvent) => {
 		e.preventDefault();
-
 		try {
-			const createdRoomId = await createRoom(roomId, '', '');
-			alert(
-				`Room créée avec l'ID: ${createdRoomId || 'généré automatiquement'}`
-			);
-			router.push(`/rooms/new/${createdRoomId}`);
-		} catch (error) {
-			console.error('Erreur lors de la création de la room:', error);
-			alert('Une erreur est survenue lors de la création de la room');
+			const user = auth.currentUser;
+			const uid = user?.uid || null;
+	
+			const id = await createRoom(roomId, null, uid);
+			router.push(`/rooms/${id}`);
+		} catch (err) {
+			console.error(err);
+			alert("Erreur lors de la création");
 		}
 	};
+	
+	
 
 	return (
 		<div className="flex flex-col min-h-screen">
@@ -50,7 +55,6 @@ export default function Home() {
 							en direct.
 						</p>
 
-						{/* Room Creation Form */}
 						<motion.div
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
@@ -69,10 +73,6 @@ export default function Home() {
 										onChange={(e) =>
 											setRoomId(e.target.value)
 										}
-										classNames={{
-											inputWrapper:
-												'!rounded-lg bg-gray-200',
-										}}
 										className="h-12"
 									/>
 								</div>
