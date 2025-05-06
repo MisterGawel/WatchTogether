@@ -20,7 +20,9 @@ export default function SyncedVideoPlayer({ roomId, userId, isAdmin }: Props) {
 	const getSyncedTime = () => {
 		if (!videoState) return 0;
 		const elapsed = (Date.now() - videoState.lastUpdate.getTime()) / 1000;
-		return videoState.playing ? videoState.timestamp + elapsed : videoState.timestamp;
+		return videoState.playing
+			? videoState.timestamp + elapsed
+			: videoState.timestamp;
 	};
 
 	useEffect(() => {
@@ -32,91 +34,91 @@ export default function SyncedVideoPlayer({ roomId, userId, isAdmin }: Props) {
 		}
 	}, [videoState]);
 
-
-    const TOLERANCE = 1.5; // Seuil de désynchronisation en secondes
+	const TOLERANCE = 1.5; // Seuil de désynchronisation en secondes
 
 	const correctDesyncIfNeeded = () => {
-        if (!playerRef.current || !videoState) return;
-        const current = playerRef.current.getCurrentTime();
-        const target = getSyncedTime();
-        const desync = Math.abs(current - target);
-    
-        if (desync > TOLERANCE) {
-            playerRef.current.seekTo(target);
-        }
-    };
-    
-    const handlePlay = () => {
-        if (!isAdmin || internalSeeking) {
-            correctDesyncIfNeeded();
-            return;
-        }
-        updateVideoState({
-            playing: true,
-            timestamp: playerRef.current?.getCurrentTime() ?? 0,
-        });
-    };
-    
-    const handlePause = () => {
-        if (!isAdmin || internalSeeking) {
-            correctDesyncIfNeeded();
-            return;
-        }
-        updateVideoState({
-            playing: false,
-            timestamp: playerRef.current?.getCurrentTime() ?? 0,
-        });
-    };
-    
-    const handleSeek = (seconds: number) => {
-        if (!isAdmin) {
-            correctDesyncIfNeeded();
-            return;
-        }
-        setInternalSeeking(true);
-        updateVideoState({
-            timestamp: seconds,
-        });
-        setTimeout(() => setInternalSeeking(false), 500);
-    };
-    
+		if (!playerRef.current || !videoState) return;
+		const current = playerRef.current.getCurrentTime();
+		const target = getSyncedTime();
+		const desync = Math.abs(current - target);
 
-    const handleEnded = async () => {
-        if (!roomId) return;
-    
-        try {
-            const res = await fetch(`/api/rooms/${roomId}/next-video`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: userId,
-                }),
-            });
-        } catch (err) {
-            console.error('Erreur lors du passage à la vidéo suivante:', err);
-        }
-    };
-    
-    
+		if (desync > TOLERANCE) {
+			playerRef.current.seekTo(target);
+		}
+	};
+
+	const handlePlay = () => {
+		if (!isAdmin || internalSeeking) {
+			correctDesyncIfNeeded();
+			return;
+		}
+		updateVideoState({
+			playing: true,
+			timestamp: playerRef.current?.getCurrentTime() ?? 0,
+		});
+	};
+
+	const handlePause = () => {
+		if (!isAdmin || internalSeeking) {
+			correctDesyncIfNeeded();
+			return;
+		}
+		updateVideoState({
+			playing: false,
+			timestamp: playerRef.current?.getCurrentTime() ?? 0,
+		});
+	};
+
+	const handleSeek = (seconds: number) => {
+		if (!isAdmin) {
+			correctDesyncIfNeeded();
+			return;
+		}
+		setInternalSeeking(true);
+		updateVideoState({
+			timestamp: seconds,
+		});
+		setTimeout(() => setInternalSeeking(false), 500);
+	};
+
+	const handleEnded = async () => {
+		if (!roomId) return;
+
+		try {
+			const res = await fetch(`/api/rooms/${roomId}/next-video`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					userId: userId,
+				}),
+			});
+		} catch (err) {
+			console.error('Erreur lors du passage à la vidéo suivante:', err);
+		}
+	};
 
 	if (!videoState?.url) {
-		return <div className="text-center py-8 text-gray-500">Aucune vidéo en cours</div>;
+		return (
+			<div className="flex items-center justify-center py-8 text-center bg-background text-foreground rounded-xl aspect-video">
+				Aucune vidéo en cours
+			</div>
+		);
 	}
 
 	return (
-		<div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
+		<div className="w-full overflow-hidden bg-black rounded-lg aspect-video">
 			<ReactPlayer
 				ref={playerRef}
 				url={videoState.url}
 				playing={videoState.playing}
-                muted={true}
+				muted={true}
 				controls
 				width="100%"
 				height="100%"
 				onPlay={handlePlay}
 				onPause={handlePause}
 				onSeek={handleSeek}
-                onEnded={handleEnded}
+				onEnded={handleEnded}
 			/>
 		</div>
 	);

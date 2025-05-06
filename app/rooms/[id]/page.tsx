@@ -1,5 +1,5 @@
 'use client';
-
+import { BsArrowRight } from 'react-icons/bs';
 import { use } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -11,6 +11,14 @@ import SearchBar from '@/components/room/SearchBar';
 import { auth, db } from '@/app/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
+import { Card, CardBody, CardHeader, Divider } from '@heroui/react';
+import { Button } from '@heroui/button';
+import { useRouter } from 'next/navigation';
+import { BsFillCameraVideoFill } from 'react-icons/bs';
+import { MdDelete } from 'react-icons/md';
+import { BsFillMegaphoneFill } from 'react-icons/bs';
+import Link from 'next/link';
+import { Tabs, Tab } from '@heroui/tabs';
 
 export default function RoomPage({
 	params,
@@ -22,6 +30,7 @@ export default function RoomPage({
 
 	const [currentUser, setCurrentUser] = useState<any>(null);
 	const [isAdmin, setIsAdmin] = useState<boolean>(false);
+	const router = useRouter();
 
 	// Vérification de l'état de connexion de l'utilisateur
 	useEffect(() => {
@@ -74,42 +83,71 @@ export default function RoomPage({
 	}
 
 	return (
-		<div className="grid min-h-screen grid-cols-1 gap-4 p-4 bg-gray-100 lg:grid-cols-5 dark:bg-gray-900">
+		<div className="flex flex-col w-full min-h-screen gap-4 p-4 lg:flex-row">
 			{/* Colonne vidéo principale */}
-			<div className="space-y-4 lg:col-span-3">
-				<SyncedVideoPlayer
-					roomId={roomId}
-					userId={currentUser.uid}
-					isAdmin={isAdmin}
-				/>
-
-				<SearchBar
-					onSelect={async (video: { url: string }) => {
-						await fetch(`/api/rooms/${roomId}/add-video`, {
-							method: 'POST',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify({
-								url: video.url,
-								user: currentUser.name || 'anonymous',
-							}),
-						});
-					}}
-				/>
-
-				<VideoQueue
-					roomId={roomId}
-					currentUserId={currentUser.uid}
-					isAdmin={isAdmin}
-				/>
-				<VideoHistory roomId={roomId} />
+			<div className="flex flex-col w-full gap-4 lg:w-3/5">
+				<div className="flex flex-col w-full h-full gap-4 px-4 py-4 bg-foreground-50 rounded-xl">
+					<SearchBar
+						onSelect={async (video: { url: string }) => {
+							await fetch(`/api/rooms/${roomId}/add-video`, {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({
+									url: video.url,
+									user: currentUser.name || 'anonymous',
+								}),
+							});
+						}}
+					/>
+					<SyncedVideoPlayer
+						roomId={roomId}
+						userId={currentUser.uid}
+						isAdmin={isAdmin}
+					/>
+					<Divider className="mt-2 bg-background" />
+					<Tabs
+						isVertical
+						classNames={{
+							base: 'flex flex-col gap-4 group-data-[selected=true]:bg-muted data-[selected=true]:text-foreground',
+							tab: 'flex flex-col items-center justify-center w-full h-full px-8 py-2 text-sm font-medium text-left transition-colors rounded-lg cursor-pointer hover:bg-muted group-data-[selected=true]:bg-muted data-[selected=true]:text-foreground',
+							cursor: 'bg-foreground-50 text-foreground font-bold ',
+						}}
+					>
+						<Tab key={'Historique'} title="Historique">
+							<VideoHistory roomId={roomId} />
+						</Tab>
+						<Tab key={'File d’attente'} title="File d’attente">
+							<VideoQueue
+								roomId={roomId}
+								currentUserId={currentUser.uid}
+								isAdmin={isAdmin}
+							/>
+						</Tab>
+					</Tabs>
+				</div>
 			</div>
 
 			{/* Colonne chat */}
-			<div className="flex flex-col lg:col-span-2">
-				<ChatRoomSocket
-					roomId={roomId}
-					username={currentUser.name || 'anonymous'}
-				/>
+			<div className="flex flex-col w-full lg:w-2/5">
+				<div className="flex flex-col w-full h-full gap-4 px-4 py-4 bg-foreground-50 rounded-xl">
+					<Card className="w-full bg-transparent shadow-none">
+						<CardHeader className="relative flex items-center justify-end px-0 pt-0 pb-2">
+							<Button
+								color="danger"
+								size="md"
+								as={Link}
+								endContent={<BsArrowRight />}
+								href={`/`}
+							>
+								Quitter la salle
+							</Button>
+						</CardHeader>
+					</Card>
+					<ChatRoomSocket
+						roomId={roomId}
+						username={currentUser.name || 'anonymous'}
+					/>
+				</div>
 			</div>
 		</div>
 	);

@@ -47,22 +47,47 @@ export default function VideoQueue({ roomId, currentUserId, isAdmin }: Props) {
 	};
 
 	return (
-		<div className="p-4 space-y-2">
-			<h2 className="text-lg font-bold">File d’attente</h2>
+		<div className="px-4 pb-4 space-y-4 grow">
 			{queue.length === 0 ? (
-				<p className="text-gray-500">Aucune vidéo en attente.</p>
+				<p className="mt-8 text-center text-gray-500">
+					Aucune vidéo en attente.
+				</p>
 			) : (
 				queue.map((video) => (
-					<div key={video.id} className="p-2 border rounded flex justify-between items-center">
-						<div>
-							<p className="font-medium">{video.text}</p>
-							<p className="text-sm text-gray-500">par {video.user}</p>
+					<div
+						key={video.id}
+						className="flex items-center gap-4 transition-shadow rounded-lg"
+					>
+						{/* Thumbnail si dispo */}
+						{video.thumbnail ? (
+							<img
+								src={video.thumbnail}
+								alt={video.text}
+								className="flex-shrink-0 object-cover w-16 h-16 rounded-md"
+							/>
+						) : (
+							<div className="flex items-center justify-center w-16 h-16 text-xl text-gray-400 bg-gray-200 rounded-md">
+								🎬
+							</div>
+						)}
+
+						{/* Infos vidéo */}
+						<div className="flex flex-col flex-1 overflow-hidden">
+							<p className="text-sm font-medium truncate sm:text-base">
+								{video.text}
+							</p>
+							<p className="mt-1 text-xs text-gray-500">
+								par {video.user}
+							</p>
 						</div>
+
+						{/* Action */}
 						{isAdmin && (
 							<Button
 								size="sm"
 								color="primary"
 								onPress={() => handleForcePlay(video)}
+								className="ml-auto hover:shadow-none"
 							>
 								Lire
 							</Button>

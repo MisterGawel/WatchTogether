@@ -28,15 +28,16 @@ export default function VideoHistory({ roomId }: { roomId: string }) {
 	}, [roomId]);
 
 	return (
-		<div className="p-4 space-y-2">
-			<h2 className="text-lg font-bold">Historique</h2>
+		<div className="p-4 space-y-2 grow">
 			{history.length === 0 ? (
 				<p className="text-gray-500">Aucune vidéo visionnée.</p>
 			) : (
 				history.map((video) => (
 					<div key={video.id} className="p-2 border rounded">
 						<p className="font-medium">{video.text}</p>
-						<p className="text-sm text-gray-500">par {video.user}</p>
+						<p className="text-sm text-gray-500">
+							par {video.user}
+						</p>
 					</div>
 				))
 			)}
