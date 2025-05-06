@@ -10,7 +10,7 @@ export default function Navbar() {
 	if (isDark === null) return null;
 
 	return (
-		<header className="border-b backdrop-blur supports-[backdrop-filter]:bg-background/60 w-full flex justify-center">
+		<header className="border-b border-foreground/10 backdrop-blur supports-[backdrop-filter]:bg-background/60 w-full flex justify-center">
 			<div className="container flex items-center justify-between h-16">
 				<Link href="/" className="flex items-center gap-2">
 					<motion.div

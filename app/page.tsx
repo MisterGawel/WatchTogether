@@ -45,37 +45,6 @@ export default function Home() {
 
 	return (
 		<div className="relative flex flex-col h-full min-h-screen overflow-hidden ">
-			<motion.div
-				className="absolute top-[-150px] left-[-100px] w-[400px] h-[400px] bg-indigo-400 opacity-40 rounded-full blur-2xl"
-				animate={{ y: [0, 20, 0], x: [0, 10, 0] }}
-				transition={{
-					duration: 8,
-					repeat: Infinity,
-					repeatType: 'loop',
-					ease: 'easeInOut',
-				}}
-			/>
-			<motion.div
-				className="absolute bottom-[-200px] right-[-150px] w-[500px] h-[500px] bg-purple-400 opacity-30 rounded-full blur-2xl"
-				animate={{ y: [0, -30, 0], x: [0, -15, 0] }}
-				transition={{
-					duration: 10,
-					repeat: Infinity,
-					repeatType: 'loop',
-					ease: 'easeInOut',
-				}}
-			/>
-			<motion.div
-				className="absolute top-1/2 left-1/2 w-[300px] h-[300px] bg-pink-400 opacity-20 rounded-full blur-xl transform -translate-x-1/2 -translate-y-1/2"
-				animate={{ scale: [1, 1.1, 1], rotate: [0, 10, -10, 0] }}
-				transition={{
-					duration: 12,
-					repeat: Infinity,
-					repeatType: 'loop',
-					ease: 'easeInOut',
-				}}
-			/>
-
 			{[
 				{
 					Icon: Video,

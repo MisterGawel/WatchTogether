@@ -7,7 +7,7 @@
 	--border: 225 100% 85%;
 	--input: 220 100% 93%;
 	--ring: 220 100% 70%;
-	--background: 210 100% 98%; /* Blanc bleuté */
+	--background: 210 100% 95%; /* Blanc bleuté */
 	--foreground: 223 76% 15%;
 	--primary: 220 100% 55%; /* Bleu intense */
 	--primary-foreground: 0 0% 100%;
@@ -33,7 +33,7 @@
 	--ring: 220 100% 30%;
 
 	/* Fond général et texte */
-	--background: 210 100% 12%; /* Bleu très sombre */
+	--background: 210 60% 13%; /* Bleu très sombre */
 	--foreground: 223 76% 85%; /* Texte clair */
 
 	/* Couleur principale (bleu foncé éclairci) */

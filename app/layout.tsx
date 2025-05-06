@@ -1,5 +1,5 @@
 import type React from 'react';
-import './styles/globals.css';
+import './globals.css';
 import { HeroProvider, ThemeProvider } from './providers';
 import { Roboto } from 'next/font/google';
 import type { Metadata } from 'next';
