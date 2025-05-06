@@ -1,6 +1,6 @@
 import type React from 'react';
 import './styles/globals.css';
-import ThemeProvider from './providers';
+import { HeroProvider, ThemeProvider } from './providers';
 import { Roboto } from 'next/font/google';
 import type { Metadata } from 'next';
 import '@theme-toggles/react/css/Classic.css';
@@ -21,7 +21,9 @@ export default function RootLayout({
 	return (
 		<html lang="fr" suppressHydrationWarning>
 			<body className={roboto.className}>
-				<ThemeProvider>{children}</ThemeProvider>
+				<ThemeProvider>
+					<HeroProvider>{children}</HeroProvider>
+				</ThemeProvider>
 			</body>
 		</html>
 	);

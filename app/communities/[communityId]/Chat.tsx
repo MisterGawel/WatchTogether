@@ -15,11 +15,18 @@ import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import { db, auth } from '@/app/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-export default function ChatCommu({ Role, roomId }) {
-	const [messages, setMessages] = useState([]);
+import type { Message } from '@/lib/types';
+
+export default function ChatCommu({
+	Role,
+	roomId,
+}: {
+	Role: string;
+	roomId: string;
+}) {
+	const [messages, setMessages] = useState<Message[]>([]);
 	const [newMessage, setNewMessage] = useState('');
 	const [expandedMessage, setExpandedMessage] = useState(null);
-	const User1 = 'Alexis'; // Remplace par l'utilisateur actuel
 	const [userName, setUserName] = useState(''); // Nouvel état pour le nom de l'utilisateur
 	const messagesRef = collection(db, `chats/${roomId}/messages`);
 
@@ -30,10 +37,13 @@ export default function ChatCommu({ Role, roomId }) {
 				id: doc.id,
 				...doc.data(),
 			}));
+
+			// @ts-expect-error loadedMessages
 			setMessages(loadedMessages);
 		});
 
-		return () => unsubscribe(); // Nettoie l'écouteur quand le composant est démonté
+		return () => unsubscribe();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [roomId]);
 
 	useEffect(() => {
@@ -69,23 +79,23 @@ export default function ChatCommu({ Role, roomId }) {
 		}
 	};
 
-	const deleteMessage = async (id) => {
+	const deleteMessage = async (id: string) => {
 		if (Role === 'admin') {
 			await deleteDoc(doc(db, `chats/${roomId}/messages`, id));
 		}
 	};
 
 	const MAX_LENGTH = 50;
+
+	// @ts-expect-error expandedMessage
 	const toggleExpandMessage = (id) => {
 		setExpandedMessage(expandedMessage === id ? null : id);
 	};
 
 	return (
-		<div className="">
-			<h1 className="p-4 text-xl font-bold text-center shadow-md bg-grey-100">
-				Espace de Chat
-			</h1>
-			<div className="flex-grow p-4 space-y-2 overflow-y-auto bg-white">
+		<div className="w-full p-6 overflow-y-auto border-2 shadow-sm bg-content1 border-background rounded-xl">
+			<h2 className="mb-4 text-xl font-bold">Chat communautaire</h2>
+			<div className="flex-grow space-y-2 overflow-y-auto ">
 				{messages.map((msg) => {
 					const isMessageExpanded = expandedMessage === msg.id;
 					const truncatedText =
@@ -94,21 +104,26 @@ export default function ChatCommu({ Role, roomId }) {
 							: msg.text;
 
 					return (
-						<Card key={msg.id} className="relative p-2">
-							<p className="font-semibold">{msg.user}</p>
+						<Card
+							key={msg.id}
+							className="relative px-4 py-3 shadow-none bg-background"
+						>
+							<p className="text-base font-medium">{msg.user}</p>
 							{Role === 'admin' && (
 								<Button
 									isIconOnly
 									size="sm"
 									variant="light"
 									color="danger"
-									onPress={() => deleteMessage(msg.id)}
+									onPress={() =>
+										msg.id && deleteMessage(msg.id)
+									}
 									className="absolute text-lg leading-none top-1 right-1"
 								>
 									×
 								</Button>
 							)}
-							<p>{truncatedText}</p>
+							<p className="text-base">{truncatedText}</p>
 							{msg.text.length > MAX_LENGTH && (
 								<Button
 									onPress={() => toggleExpandMessage(msg.id)}
@@ -123,7 +138,7 @@ export default function ChatCommu({ Role, roomId }) {
 					);
 				})}
 			</div>
-			<div className="flex p-4 space-x-2 bg-white">
+			<div className="flex py-4 space-x-2 ">
 				<Input
 					value={newMessage}
 					onChange={(e) => setNewMessage(e.target.value)}
@@ -132,6 +147,7 @@ export default function ChatCommu({ Role, roomId }) {
 				/>
 				<Button
 					onPress={sendMessage}
+					color="primary"
 					className="flex items-center gap-2"
 				>
 					Envoyer

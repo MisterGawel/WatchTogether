@@ -12,6 +12,18 @@ import { useRouter } from 'next/navigation';
 import { createRoom } from '@/lib/createRoom';
 import { auth } from '@/app/firebase';
 
+import Image from 'next/image';
+import {
+	Video,
+	Gamepad2,
+	Music,
+	Film,
+	Users,
+	Mic2,
+	Headphones,
+	MonitorPlay,
+	Tv,
+} from 'lucide-react';
 
 export default function Home() {
 	const [roomId, setRoomId] = useState('');
@@ -22,22 +34,121 @@ export default function Home() {
 		try {
 			const user = auth.currentUser;
 			const uid = user?.uid || null;
-	
+
 			const id = await createRoom(roomId, null, uid);
 			router.push(`/rooms/${id}`);
 		} catch (err) {
 			console.error(err);
-			alert("Erreur lors de la création");
+			alert('Erreur lors de la création');
 		}
 	};
-	
-	
 
 	return (
-		<div className="flex flex-col min-h-screen">
+		<div className="relative flex flex-col h-full min-h-screen overflow-hidden ">
+			<motion.div
+				className="absolute top-[-150px] left-[-100px] w-[400px] h-[400px] bg-indigo-400 opacity-40 rounded-full blur-2xl"
+				animate={{ y: [0, 20, 0], x: [0, 10, 0] }}
+				transition={{
+					duration: 8,
+					repeat: Infinity,
+					repeatType: 'loop',
+					ease: 'easeInOut',
+				}}
+			/>
+			<motion.div
+				className="absolute bottom-[-200px] right-[-150px] w-[500px] h-[500px] bg-purple-400 opacity-30 rounded-full blur-2xl"
+				animate={{ y: [0, -30, 0], x: [0, -15, 0] }}
+				transition={{
+					duration: 10,
+					repeat: Infinity,
+					repeatType: 'loop',
+					ease: 'easeInOut',
+				}}
+			/>
+			<motion.div
+				className="absolute top-1/2 left-1/2 w-[300px] h-[300px] bg-pink-400 opacity-20 rounded-full blur-xl transform -translate-x-1/2 -translate-y-1/2"
+				animate={{ scale: [1, 1.1, 1], rotate: [0, 10, -10, 0] }}
+				transition={{
+					duration: 12,
+					repeat: Infinity,
+					repeatType: 'loop',
+					ease: 'easeInOut',
+				}}
+			/>
+
+			{[
+				{
+					Icon: Video,
+					position: 'top-1/3 left-8',
+					color: 'text-indigo-400',
+					size: 48,
+				},
+				{
+					Icon: Gamepad2,
+					position: 'top-[15%] left-[15%]',
+					color: 'text-purple-400',
+					size: 44,
+				},
+				{
+					Icon: Music,
+					position: 'top-[60%] left-[10%]',
+					color: 'text-pink-400',
+					size: 42,
+				},
+				{
+					Icon: Film,
+					position: 'top-[80%] left-[20%]',
+					color: 'text-blue-400',
+					size: 46,
+				},
+				{
+					Icon: MonitorPlay,
+					position: 'top-[15%] right-[15%]',
+					color: 'text-indigo-300',
+					size: 48,
+				},
+				{
+					Icon: Mic2,
+					position: 'top-[40%] right-[10%]',
+					color: 'text-purple-300',
+					size: 40,
+				},
+				{
+					Icon: Headphones,
+					position: 'top-[65%] right-[12%]',
+					color: 'text-pink-300',
+					size: 44,
+				},
+				{
+					Icon: Tv,
+					position: 'bottom-10 right-8',
+					color: 'text-blue-300',
+					size: 46,
+				},
+				{
+					Icon: Users,
+					position: 'bottom-[15%] left-[45%]',
+					color: 'text-indigo-300',
+					size: 40,
+				},
+			].map(({ Icon, position, color, size }, idx) => (
+				<motion.div
+					key={idx}
+					className={`absolute ${position} ${color} opacity-40`}
+					animate={{ y: [0, 12, 0], rotate: [0, 5, -5, 0] }}
+					transition={{
+						duration: 6 + (idx % 3),
+						repeat: Infinity,
+						repeatType: 'loop',
+						ease: 'easeInOut',
+					}}
+				>
+					<Icon size={size} />
+				</motion.div>
+			))}
 			<Navbar />
 
-			<section className="container flex-1 w-full py-12 mx-auto md:py-24 lg:py-32">
+			<section className="container relative z-10 flex-1 w-full h-full py-12 mx-auto md:py-24 lg:py-32">
 				<div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
@@ -73,6 +184,10 @@ export default function Home() {
 										onChange={(e) =>
 											setRoomId(e.target.value)
 										}
+										classNames={{
+											inputWrapper:
+												'!rounded-lg bg-content1 text-foreground',
+										}}
 										className="h-12"
 									/>
 								</div>
@@ -98,20 +213,15 @@ export default function Home() {
 						transition={{ delay: 0.2, duration: 0.6 }}
 						className="relative"
 					>
-						<div className="overflow-hidden border shadow-xl aspect-video rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
-							<div className="absolute inset-0 flex items-center justify-center">
-								<div className="p-6 text-center">
-									<div className="flex items-center justify-center mx-auto mb-4 rounded-full size-16 bg-primary/20">
-										<div className="flex items-center justify-center rounded-full size-10 bg-primary">
-											<span className="font-bold text-primary-foreground">
-												W
-											</span>
-										</div>
-									</div>
-									<p className="text-muted-foreground">
-										Aperçu de l&apos;interface
-									</p>
-								</div>
+						<div className="relative z-50 overflow-hidden border shadow-xl aspect-video rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
+							<div className="absolute inset-0 z-50 flex items-center justify-center">
+								<Image
+									src="/image.png"
+									alt="Hero Image"
+									width={800}
+									height={450}
+									className="object-cover w-full h-full rounded-xl"
+								/>
 							</div>
 						</div>
 						<div className="absolute z-10 rounded-full -top-6 -right-6 size-24 bg-primary/10 blur-xl"></div>

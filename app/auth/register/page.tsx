@@ -37,7 +37,6 @@ export default function RegisterPage() {
 				dataForm.email,
 				dataForm.password
 			);
-			console.log(user);
 
 			await setDoc(doc(db, 'users', user.uid), {
 				email: user.email,

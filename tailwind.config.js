@@ -58,6 +58,10 @@ module.exports = {
 					4: 'hsl(var(--chart-4))',
 					5: 'hsl(var(--chart-5))',
 				},
+				animation: {
+					'pulse-slow': 'pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+					'pulse-slower': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				},
 			},
 		},
 	},
