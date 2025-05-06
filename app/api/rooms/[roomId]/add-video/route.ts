@@ -9,26 +9,37 @@ import {
 	updateDoc,
 } from 'firebase/firestore';
 
-export async function POST(req: NextRequest, { params }: { params: { roomId: string } }) {
+export async function POST(req: NextRequest) {
 	try {
-		const { roomId } = params;
+		const { pathname } = req.nextUrl;
+		const match = pathname.match(/\/rooms\/([^/]+)\//);
+		const roomId = match ? match[1] : null;
+
+		if (!roomId) {
+			return NextResponse.json(
+				{ error: 'Paramètre roomId manquant' },
+				{ status: 400 }
+			);
+		}
+
 		const body = await req.json();
 		const { url, user } = body;
 
 		if (!url || !user) {
-			return NextResponse.json({ error: 'Paramètres manquants' }, { status: 400 });
+			return NextResponse.json(
+				{ error: 'Paramètres manquants' },
+				{ status: 400 }
+			);
 		}
 
 		const waitRef = collection(db, `rooms/${roomId}/wait_links`);
 
-		// Ajoute à la file d'attente
 		await addDoc(waitRef, {
 			text: url,
 			user,
 			timestamp: serverTimestamp(),
 		});
 
-		// 🔍 Vérifie si une vidéo est en cours
 		const currentRef = doc(db, 'rooms', roomId);
 		const currentSnap = await getDoc(currentRef);
 		const currentData = currentSnap.data();
@@ -36,7 +47,6 @@ export async function POST(req: NextRequest, { params }: { params: { roomId: str
 		const hasCurrentVideo = currentData?.currentVideo?.url;
 
 		if (!hasCurrentVideo) {
-			// 🎬 Force cette vidéo comme première vidéo
 			await updateDoc(currentRef, {
 				currentVideo: {
 					url,

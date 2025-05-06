@@ -4,7 +4,7 @@ import { Button, Input } from '@heroui/react';
 import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/modal';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { createRoom } from '@/app/rooms/new/roomService';
+import { createRoom } from '@/lib/createRoom';
 
 export default function CreateRoomClient({
 	communityId,
