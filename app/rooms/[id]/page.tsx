@@ -32,6 +32,26 @@ export default function RoomPage({
 	const [isAdmin, setIsAdmin] = useState<boolean>(false);
 	const router = useRouter();
 
+	// On vérifie que la salle existe sinon on redirige vers la page d'accueil
+	useEffect(() => {
+		if (!roomId) return;
+		const checkRoomExists = async () => {
+			try {
+				const roomRef = doc(db, 'rooms', roomId);
+				const roomSnap = await getDoc(roomRef);
+				if (!roomSnap.exists()) {
+					// La salle n'existe pas, rediriger vers la page d'accueil
+					router.push('/');
+				}
+			} catch (err) {
+				console.error('Erreur vérification salle:', err);
+				// En cas d'erreur, rediriger vers la page d'accueil
+				router.push('/');
+			}
+		};
+		checkRoomExists();
+	}, [roomId, router]);
+
 	// Vérification de l'état de connexion de l'utilisateur
 	useEffect(() => {
 		const unsub = onAuthStateChanged(auth, async (user) => {
