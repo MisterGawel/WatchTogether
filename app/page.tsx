@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useState } from 'react';
+import { useState,useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Input } from '@heroui/input';
@@ -11,6 +11,8 @@ import Navbar from '@/components/layout/navbar';
 import { useRouter } from 'next/navigation';
 import { createRoom } from '@/lib/createRoom';
 import { auth } from '@/app/firebase';
+import { toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 import Image from 'next/image';
 import {
@@ -29,6 +31,20 @@ export default function Home() {
 	const [roomId, setRoomId] = useState('');
 	const router = useRouter();
 
+	//Vérification de la tentative de connexion a une salle inexistante
+	const hasShownToast = useRef(false);
+
+	useEffect(() => {
+	  const params = new URLSearchParams(window.location.search);
+	  const error = params.get('error');
+	
+	  if (error === 'room-not-found' && !hasShownToast.current) {
+		toast.error('La salle n\'existe pas ou a été supprimée.');
+		hasShownToast.current = true;
+	  }
+	}, []);
+	
+
 	const handleCreateRoom = async (e: React.FormEvent) => {
 		e.preventDefault();
 		try {
@@ -45,6 +61,7 @@ export default function Home() {
 
 	return (
 		<div className="relative flex flex-col h-full min-h-screen overflow-hidden ">
+			<Toaster/>
 			{[
 				{
 					Icon: Video,

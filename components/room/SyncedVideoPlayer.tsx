@@ -84,17 +84,26 @@ export default function SyncedVideoPlayer({ roomId, userId, isAdmin }: Props) {
 	const handleEnded = async () => {
 		if (!roomId) return;
 
-		try {
-			const res = await fetch(`/api/rooms/${roomId}/next-video`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					userId: userId,
-				}),
-			});
-		} catch (err) {
-			console.error('Erreur lors du passage à la vidéo suivante:', err);
+		const nextVideo = await fetch(`/api/rooms/${roomId}/next-video`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+		});
+		const data = await nextVideo.json();
+		if (data.error) {
+			console.error('Erreur lors de la lecture de la vidéo suivante:', data.error);
+			return;
 		}
+		if (data.message) {
+			console.log(data.message);
+			return;
+		}
+		if (data.success) {
+			console.log('Lecture de la vidéo suivante réussie');
+		}
+		updateVideoState({
+			playing: true,
+			timestamp: 0,
+		});
 	};
 
 	if (!videoState?.url) {

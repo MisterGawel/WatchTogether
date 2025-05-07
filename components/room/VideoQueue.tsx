@@ -17,6 +17,8 @@ type VideoItem = {
 	id: string;
 	text: string;
 	user: string;
+	thumbnail?: string;
+	title?: string;
 };
 
 type Props = {
@@ -46,6 +48,11 @@ export default function VideoQueue({ roomId, currentUserId, isAdmin }: Props) {
 		await deleteDoc(doc(db, `rooms/${roomId}/wait_links/${video.id}`));
 	};
 
+	const handleRemove = async (video: VideoItem) => {
+		await deleteDoc(doc(db, `rooms/${roomId}/wait_links/${video.id}`));
+	};
+	  
+
 	return (
 		<div className="px-4 pb-4 space-y-4 grow">
 			{queue.length === 0 ? (
@@ -74,24 +81,28 @@ export default function VideoQueue({ roomId, currentUserId, isAdmin }: Props) {
 						{/* Infos vidéo */}
 						<div className="flex flex-col flex-1 overflow-hidden">
 							<p className="text-sm font-medium truncate sm:text-base">
-								{video.text}
+								{video.title || video.text}
 							</p>
 							<p className="mt-1 text-xs text-gray-500">
-								par {video.user}
+								Ajouté par {video.user}
 							</p>
 						</div>
 
 						{/* Action */}
 						{isAdmin && (
-							<Button
+							<div className="flex gap-2 ml-auto">
+								<Button
 								size="sm"
 								color="primary"
 								onPress={() => handleForcePlay(video)}
-								className="ml-auto hover:shadow-none"
-							>
+								className="hover:shadow-none"
+								>
 								Lire
-							</Button>
-						)}
+								</Button>
+								<Button size="sm" color="danger" onClick={() => handleRemove(video)}>🗑️</Button>
+							</div>
+							)}
+
 					</div>
 				))
 			)}
