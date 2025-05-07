@@ -10,6 +10,8 @@ type Video = {
 	text: string;
 	user: string;
 	timestamp: any;
+	thumbnail?: string;
+	title?: string;
 };
 
 export default function VideoHistory({ roomId }: { roomId: string }) {
@@ -28,16 +30,37 @@ export default function VideoHistory({ roomId }: { roomId: string }) {
 	}, [roomId]);
 
 	return (
-		<div className="p-4 space-y-2 grow">
+		<div className="p-4 space-y-4 grow">
 			{history.length === 0 ? (
 				<p className="text-gray-500">Aucune vidéo visionnée.</p>
 			) : (
 				history.map((video) => (
-					<div key={video.id} className="p-2 border rounded">
-						<p className="font-medium">{video.text}</p>
-						<p className="text-sm text-gray-500">
-							par {video.user}
-						</p>
+					<div
+						key={video.id}
+						className="flex items-center gap-4 transition-shadow rounded-lg"
+					>
+						{/* Thumbnail si dispo */}
+						{video.thumbnail ? (
+							<img
+								src={video.thumbnail}
+								alt={video.text}
+								className="flex-shrink-0 object-cover w-16 h-16 rounded-md"
+							/>
+						) : (
+							<div className="flex items-center justify-center w-16 h-16 text-xl text-gray-400 bg-gray-200 rounded-md">
+								🎞️
+							</div>
+						)}
+
+						{/* Infos vidéo */}
+						<div className="flex flex-col overflow-hidden">
+							<p className="text-sm font-medium truncate sm:text-base">
+								{video.title || video.text}
+							</p>
+							<p className="mt-1 text-xs text-gray-500">
+								Visionné par {video.user}
+							</p>
+						</div>
 					</div>
 				))
 			)}

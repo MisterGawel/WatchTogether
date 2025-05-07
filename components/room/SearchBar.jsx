@@ -201,8 +201,6 @@ export default function SearchBar({ onSelect }) {
 		}
 	};
 
-	console.log(platform);
-
 	return (
 		<div className="space-y-4 h-[40px]">
 			{/* Search input + Select */}

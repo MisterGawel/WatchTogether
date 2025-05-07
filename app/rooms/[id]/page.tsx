@@ -32,7 +32,7 @@ export default function RoomPage({
 	const [isAdmin, setIsAdmin] = useState<boolean>(false);
 	const router = useRouter();
 
-	// On vérifie que la salle existe sinon on redirige vers la page d'accueil
+	// On vérifie que la salle existe sinon on redirige vers la page d'accueil et on affiche une alerte
 	useEffect(() => {
 		if (!roomId) return;
 		const checkRoomExists = async () => {
@@ -40,8 +40,7 @@ export default function RoomPage({
 				const roomRef = doc(db, 'rooms', roomId);
 				const roomSnap = await getDoc(roomRef);
 				if (!roomSnap.exists()) {
-					// La salle n'existe pas, rediriger vers la page d'accueil
-					router.push('/');
+					router.push('/?error=room-not-found');
 				}
 			} catch (err) {
 				console.error('Erreur vérification salle:', err);
@@ -75,6 +74,7 @@ export default function RoomPage({
 		return () => unsub();
 	}, []);
 
+	// Vérification si l'utilisateur est admin de la salle
 	useEffect(() => {
 		if (!currentUser || !roomId) return;
 
@@ -101,24 +101,27 @@ export default function RoomPage({
 			</div>
 		);
 	}
-
+	
 	return (
 		<div className="flex flex-col w-full min-h-screen gap-4 p-4 lg:flex-row">
 			{/* Colonne vidéo principale */}
 			<div className="flex flex-col w-full gap-4 lg:w-3/5">
 				<div className="flex flex-col w-full h-full gap-4 px-4 py-4 bg-foreground-50 rounded-xl">
-					<SearchBar
-						onSelect={async (video: { url: string }) => {
-							await fetch(`/api/rooms/${roomId}/add-video`, {
-								method: 'POST',
-								headers: { 'Content-Type': 'application/json' },
-								body: JSON.stringify({
-									url: video.url,
-									user: currentUser.name || 'anonymous',
-								}),
-							});
-						}}
+				<SearchBar
+					onSelect={async (video) => {
+						await fetch(`/api/rooms/${roomId}/add-video`, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							url: video.url,
+							user: currentUser.name || 'anonymous',
+							title: video.title,
+							thumbnail: video.thumbnail,
+						}),
+						});
+					}}
 					/>
+
 					<SyncedVideoPlayer
 						roomId={roomId}
 						userId={currentUser.uid}

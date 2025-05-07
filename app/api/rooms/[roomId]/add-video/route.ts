@@ -7,6 +7,9 @@ import {
 	getDoc,
 	serverTimestamp,
 	updateDoc,
+	getDocs,
+	query,
+	limit,
 } from 'firebase/firestore';
 
 export async function POST(req: NextRequest) {
@@ -23,7 +26,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json();
-		const { url, user } = body;
+		const { url, user, title, thumbnail } = body;
 
 		if (!url || !user) {
 			return NextResponse.json(
@@ -32,22 +35,21 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
+		const roomRef = doc(db, 'rooms', roomId);
+		const roomSnap = await getDoc(roomRef);
+		const roomData = roomSnap.data();
+		const hasCurrentVideo = roomData?.currentVideo?.url;
+
 		const waitRef = collection(db, `rooms/${roomId}/wait_links`);
+		const historyRef = collection(db, `rooms/${roomId}/history`);
 
-		await addDoc(waitRef, {
-			text: url,
-			user,
-			timestamp: serverTimestamp(),
-		});
+		// Vérifie s'il y a déjà des vidéos dans la file
+		const waitSnapshot = await getDocs(query(waitRef, limit(1)));
+		const hasQueue = !waitSnapshot.empty;
 
-		const currentRef = doc(db, 'rooms', roomId);
-		const currentSnap = await getDoc(currentRef);
-		const currentData = currentSnap.data();
-
-		const hasCurrentVideo = currentData?.currentVideo?.url;
-
-		if (!hasCurrentVideo) {
-			await updateDoc(currentRef, {
+		if (!hasCurrentVideo && !hasQueue) {
+			// 🎬 Pas de vidéo en cours et file vide => on joue direct
+			await updateDoc(roomRef, {
 				currentVideo: {
 					url,
 					playing: true,
@@ -55,6 +57,24 @@ export async function POST(req: NextRequest) {
 					lastUpdate: serverTimestamp(),
 					forcedBy: user,
 				},
+			});
+
+			// 📝 On ajoute à l'historique
+			await addDoc(historyRef, {
+				text: url,
+				user,
+				title,
+				thumbnail,
+				timestamp: serverTimestamp(),
+			});
+		} else {
+			// 🗂 Sinon on l’ajoute à la file
+			await addDoc(waitRef, {
+				text: url,
+				user,
+				title,
+				thumbnail,
+				timestamp: serverTimestamp(),
 			});
 		}
 
