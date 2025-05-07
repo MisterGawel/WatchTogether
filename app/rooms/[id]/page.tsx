@@ -10,7 +10,7 @@ import ChatRoomSocket from '@/components/room/ChatRoomSocket';
 import SearchBar from '@/components/room/SearchBar';
 import { auth, db } from '@/app/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Card, CardBody, CardHeader, Divider } from '@heroui/react';
 import { Button } from '@heroui/button';
 import { useRouter } from 'next/navigation';
@@ -93,7 +93,20 @@ export default function RoomPage({
 
 		checkAdmin();
 	}, [currentUser, roomId]);
-
+		//Code pour le nombre de perssone dans la room (ALEXIS)
+		useEffect(() => {
+			if (!currentUser || !roomId) return;
+		
+			const interval = setInterval(() => {
+				setDoc(doc(db, 'presence', currentUser.uid), {
+					userId: currentUser.uid,
+					roomId: roomId,
+					lastSeen: Date.now()
+				});
+			}, 10000); // ping toutes les 10s
+		
+			return () => clearInterval(interval);
+		}, [currentUser, roomId]);
 	if (!currentUser) {
 		return (
 			<div className="flex items-center justify-center h-screen bg-gray-100">
@@ -101,7 +114,7 @@ export default function RoomPage({
 			</div>
 		);
 	}
-	
+
 	return (
 		<div className="flex flex-col w-full min-h-screen gap-4 p-4 lg:flex-row">
 			{/* Colonne vidéo principale */}
