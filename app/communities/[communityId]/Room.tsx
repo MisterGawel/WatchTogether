@@ -71,7 +71,7 @@ export default function CardRoom({
 								isIconOnly
 								size="md"
 								onPress={() => {
-									router.push(`/rooms/new/${room.id}`);
+									router.push(`/rooms/${room.id}`);
 								}}
 							>
 								<BsFillArrowRightCircleFill className="text-xl" />

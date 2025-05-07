@@ -21,7 +21,7 @@ export default function CreateRoomClient({
 
 		try {
 			const roomId = await createRoom(roomName, communityId, '1');
-			router.push(`/rooms/new/${roomId}`);
+			router.push(`/rooms/${roomId}`);
 		} catch (error) {
 			console.error('Erreur création room:', error);
 			alert('Erreur lors de la création de la salle');
