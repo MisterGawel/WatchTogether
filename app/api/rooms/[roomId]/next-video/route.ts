@@ -3,87 +3,92 @@
 import { db } from '@/app/firebase';
 import { NextRequest, NextResponse } from 'next/server';
 import {
-	doc,
-	collection,
-	getDocs,
-	query,
-	limit,
-	deleteDoc,
-	updateDoc,
-	addDoc,
-	serverTimestamp,
-	getDoc,
+  doc,
+  collection,
+  getDocs,
+  query,
+  limit,
+  deleteDoc,
+  setDoc,
+  addDoc,
+  serverTimestamp,
+  runTransaction,
 } from 'firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(
-	req: NextRequest,
-	{ params }: { params: { roomId: string } }
+  req: NextRequest,
+  { params }: { params: { roomId: string } }
 ) {
-	try {
-		const roomId = params.roomId;
-		if (!roomId) {
-			return NextResponse.json({ error: 'roomId manquant' }, { status: 400 });
-		}
+  try {
+    const roomId = params.roomId;
 
-		const roomRef = doc(db, 'rooms', roomId);
-		const waitRef = collection(db, `rooms/${roomId}/wait_links`);
-		const historyRef = collection(db, `rooms/${roomId}/history`);
+    if (!roomId) {
+      return NextResponse.json({ error: 'roomId manquant' }, { status: 400 });
+    }
 
-		// 🔁 Vérifie si une vidéo est déjà en cours de mise à jour
-		const roomSnap = await getDoc(roomRef);
-		const current = roomSnap.data()?.currentVideo;
+    const roomRef = doc(db, 'rooms', roomId);
+    const waitRef = collection(db, `rooms/${roomId}/wait_links`);
+    const historyRef = collection(db, `rooms/${roomId}/history`);
 
-		// Protection anti-double appel : si une vidéo a été mise à jour dans la dernière seconde, on ignore
-		if (
-			current?.lastUpdate?.toMillis &&
-			Date.now() - current.lastUpdate.toMillis() < 1000
-		) {
-			console.warn('Mise à jour trop récente, ignorer appel concurrent');
-			return NextResponse.json({ skipped: true });
-		}
+    // 🔍 Lire en dehors de la transaction l'ID du document à jouer
+    const waitSnap = await getDocs(query(waitRef, limit(1)));
+    if (waitSnap.empty) {
+      // ❌ File vide → on vide la vidéo actuelle
+      await setDoc(
+        roomRef,
+        {
+          currentVideo: {
+            url: '',
+            playing: false,
+            timestamp: 0,
+            lastUpdate: serverTimestamp(),
+            forcedBy: '',
+            updateToken: uuidv4(),
+          },
+        },
+        { merge: true }
+      );
+      return NextResponse.json({ message: 'File vide, lecture arrêtée.' });
+    }
 
-		// 🔍 Récupère la première vidéo de la file
-		const waitSnap = await getDocs(query(waitRef, limit(1)));
+    const docToPlay = waitSnap.docs[0];
+    const videoId = docToPlay.id;
+    const videoRef = doc(db, `rooms/${roomId}/wait_links/${videoId}`);
+    const videoData = docToPlay.data();
 
-		if (waitSnap.empty) {
-			// ❌ File vide → on retire la vidéo actuelle
-			await updateDoc(roomRef, {
-				currentVideo: {}, // Vide complètement
-			});
-			return NextResponse.json({ message: 'File vide, lecture arrêtée.' });
-		}
+    // ✅ Transaction pour supprimer et écrire la vidéo actuelle de façon atomique
+    await runTransaction(db, async (transaction) => {
+      transaction.delete(videoRef);
 
-		// ✅ Lecture de la première vidéo
-		const videoDoc = waitSnap.docs[0];
-		const videoData = videoDoc.data();
-		const videoId = videoDoc.id;
+      const cleanVideo = {
+        url: videoData.text ?? '',
+        playing: true,
+        timestamp: 0,
+        lastUpdate: serverTimestamp(),
+        forcedBy: videoData.user ?? 'inconnu',
+        updateToken: uuidv4(),
+      };
 
-		// ✅ Met à jour la vidéo actuelle
-		await updateDoc(roomRef, {
-			currentVideo: {
-				url: videoData.text,
-				playing: true,
-				timestamp: 0,
-				lastUpdate: serverTimestamp(),
-				forcedBy: videoData.user || 'inconnu',
-			},
-		});
+      transaction.set(roomRef, { currentVideo: cleanVideo }, { merge: true });
+    });
 
-		// ✅ Supprime de la file
-		await deleteDoc(doc(waitRef, videoId));
+    //On relis la vidéo actuelle pour s'assurer qu'elle est bien jouée
+    const roomSnap = await getDocs(roomRef);
+    const roomData = roomSnap.data();
 
-		// ✅ Ajoute à l'historique
-		await addDoc(historyRef, {
-			text: videoData.text,
-			title: videoData.title || '',
-			thumbnail: videoData.thumbnail || '',
-			user: videoData.user || 'inconnu',
-			timestamp: serverTimestamp(),
-		});
+    // ✅ Ajouter à l'historique (hors transaction)
+    await addDoc(historyRef, {
+      text: videoData.text ?? '',
+      title: videoData.title ?? '',
+      thumbnail: videoData.thumbnail ?? '',
+      user: videoData.user ?? 'inconnu',
+      timestamp: serverTimestamp(),
+    });
 
-		return NextResponse.json({ success: true });
-	} catch (err) {
-		console.error('Erreur /next-video:', err);
-		return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
-	}
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error('Erreur /next-video (corrigée):', err);
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+  }
 }
