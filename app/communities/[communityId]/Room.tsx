@@ -31,7 +31,7 @@ export default function CardRoom({
 
 		const unsubscribe = onSnapshot(q, (snapshot) => {
 			const now = Date.now();
-			const THRESHOLD = 30_000; // 30 secondes
+			const THRESHOLD = 10_000; // 30 secondes
 
 			const activeUsers = snapshot.docs.filter((doc) => {
 				const data = doc.data();

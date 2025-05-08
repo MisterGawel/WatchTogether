@@ -3,16 +3,28 @@
 import { Button, Input } from '@heroui/react';
 import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/modal';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createRoom } from '@/lib/createRoom';
-
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth, db } from '@/app/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 export default function CreateRoomClient({
 	communityId,
 }: {
 	communityId: string;
 }) {
-	const [roomName, setRoomName] = useState<string>('');
 
+	const [roomName, setRoomName] = useState<string>('');
+	const [User, setUser] = useState<string>('');
+	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+			if (currentUser) {
+				setUser(currentUser.uid);
+			} 
+		});
+
+		return () => unsubscribe();
+	}, []);
 	const handleSubmit = async () => {
 		if (!roomName.trim()) {
 			alert('Veuillez entrer un nom de salle');
@@ -20,7 +32,7 @@ export default function CreateRoomClient({
 		}
 
 		try {
-			const roomId = await createRoom(roomName, communityId, '1');
+			const roomId = await createRoom(roomName, communityId, User);
 			router.push(`/rooms/${roomId}`);
 		} catch (error) {
 			console.error('Erreur création room:', error);
