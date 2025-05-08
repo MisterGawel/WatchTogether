@@ -93,20 +93,20 @@ export default function RoomPage({
 
 		checkAdmin();
 	}, [currentUser, roomId]);
-		//Code pour le nombre de perssone dans la room (ALEXIS)
-		useEffect(() => {
-			if (!currentUser || !roomId) return;
-		
-			const interval = setInterval(() => {
-				setDoc(doc(db, 'presence', currentUser.uid), {
-					userId: currentUser.uid,
-					roomId: roomId,
-					lastSeen: Date.now()
-				});
-			}, 10000); // ping toutes les 10s
-		
-			return () => clearInterval(interval);
-		}, [currentUser, roomId]);
+	//Code pour le nombre de perssone dans la room (ALEXIS)
+	useEffect(() => {
+		if (!currentUser || !roomId) return;
+
+		const interval = setInterval(() => {
+			setDoc(doc(db, 'presence', currentUser.uid), {
+				userId: currentUser.uid,
+				roomId: roomId,
+				lastSeen: Date.now(),
+			});
+		}, 10000); // ping toutes les 10s
+
+		return () => clearInterval(interval);
+	}, [currentUser, roomId]);
 	if (!currentUser) {
 		return (
 			<div className="flex items-center justify-center h-screen bg-gray-100">
@@ -120,19 +120,20 @@ export default function RoomPage({
 			{/* Colonne vidéo principale */}
 			<div className="flex flex-col w-full gap-4 lg:w-3/5">
 				<div className="flex flex-col w-full h-full gap-4 px-4 py-4 bg-foreground-50 rounded-xl">
-				<SearchBar
-					onSelect={async (video) => {
-						await fetch(`/api/rooms/${roomId}/add-video`, {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({
-							url: video.url,
-							user: currentUser.name || 'anonymous',
-							title: video.title,
-							thumbnail: video.thumbnail,
-						}),
-						});
-					}}
+					<SearchBar
+						// @ts-expect-error blabla
+						onSelect={async (video) => {
+							await fetch(`/api/rooms/${roomId}/add-video`, {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({
+									url: video.url,
+									user: currentUser.name || 'anonymous',
+									title: video.title,
+									thumbnail: video.thumbnail,
+								}),
+							});
+						}}
 					/>
 
 					<SyncedVideoPlayer
