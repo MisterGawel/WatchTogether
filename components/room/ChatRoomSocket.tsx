@@ -29,6 +29,8 @@ type ChatMessage = {
   user: string;
   timestamp: Date;
   userID: string;
+  editedAt?: Date;
+  isEdited?: boolean;
 };
 
 interface ChatRoomSocketProps {
@@ -92,18 +94,22 @@ export default function ChatRoomSocket({
     fetchRoomData();
   }, [roomId]);
 
-  // Firebase messages listener
   useEffect(() => {
     const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedMessages: ChatMessage[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        text: doc.data().text,
-        user: doc.data().user,
-        userID: doc.data().userID || '',
-        timestamp: doc.data().timestamp?.toDate?.() || new Date(),
-      }));
+      const fetchedMessages: ChatMessage[] = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          text: data.text,
+          user: data.user,
+          userID: data.userID || '',
+          timestamp: data.timestamp?.toDate() || new Date(),
+          editedAt: data.editedAt?.toDate(),
+          isEdited: !!data.editedAt
+        };
+      });
       setMessages(fetchedMessages);
       setLoading(false);
       
@@ -115,7 +121,6 @@ export default function ChatRoomSocket({
     return () => unsubscribe();
   }, [roomId]);
 
-  // Socket.io connection for real-time updates
   useEffect(() => {
     let active = true;
 
@@ -135,7 +140,9 @@ export default function ChatRoomSocket({
           text: msg.text,
           user: msg.user,
           userID: msg.userID || '',
-          timestamp: new Date(msg.timestamp || Date.now())
+          timestamp: new Date(msg.timestamp || Date.now()),
+          editedAt: msg.editedAt ? new Date(msg.editedAt) : undefined,
+          isEdited: msg.isEdited || false
         }]);
       };
 
@@ -174,33 +181,36 @@ export default function ChatRoomSocket({
       const auth = getAuth();
       const user = auth.currentUser;
 
-      if (!user) {
-        alert("Vous devez être connecté pour envoyer un message");
-        return;
+      let displayName;
+      if (user) {
+        displayName = user.displayName || username; 
+      } else {
+        displayName = localStorage.getItem('guestName') || 'Invité';
       }
 
-      const userID = user.uid;
+      const userID = user?.uid || 'anonymous';
+
       const requiresAuth = !!communityId;
 
-      // Send to Firebase
       const newDoc = await addDoc(messagesRef, {
         text: newMessage,
-        user: username,
+        user: displayName,
         userID: userID,
         timestamp: serverTimestamp(),
-        requiresAuth: requiresAuth
+        requiresAuth: requiresAuth,
+        isEdited: false
       });
 
-      // Also send via Socket.io
       if (socketRef.current) {
         socketRef.current.emit('send_message', { 
           roomId, 
           message: {
             id: newDoc.id,
             text: newMessage,
-            user: username,
+            user: displayName,
             userID: userID,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            isEdited: false
           }
         });
       }
@@ -238,15 +248,17 @@ export default function ChatRoomSocket({
       const messageRef = doc(db, `chats/${roomId}/messages/${editingMessageId}`);
       await updateDoc(messageRef, {
         text: editedMessageText,
-        editedAt: serverTimestamp()
+        editedAt: serverTimestamp(),
+        isEdited: true
       });
 
-      // Mise à jour via Socket.io si nécessaire
       if (socketRef.current) {
         socketRef.current.emit('edit_message', {
           roomId,
           messageId: editingMessageId,
-          newText: editedMessageText
+          newText: editedMessageText,
+          editedAt: new Date().toISOString(),
+          isEdited: true
         });
       }
 
@@ -319,12 +331,10 @@ export default function ChatRoomSocket({
               )}
               
               <div className="flex flex-row">
-                {/* Icône utilisateur */}
                 <div className={`flex items-start pt-1 flex-shrink-0 w-8 h-8 mr-3 rounded-full ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
                   <FaUserAlt className={`m-auto text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} />
                 </div>
 
-                {/* Contenu du message */}
                 <div className="flex flex-col flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 mb-1">
                     <span className={`text-sm font-medium ${
@@ -372,6 +382,19 @@ export default function ChatRoomSocket({
                       <p className={darkMode ? 'text-gray-100' : 'text-gray-800'}>
                         {displayText}
                       </p>
+
+                      {(msg.editedAt || msg.isEdited) && (
+                        <div className="flex items-center mt-1">
+                          <span className={`text-xs italic ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                            modifié
+                          </span>
+                          {msg.editedAt && (
+                            <span className={`ml-1 text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                              {formatDateTime(msg.editedAt)}
+                            </span>
+                          )}
+                        </div>
+                      )}
 
                       <div className="absolute top-1 right-1 flex gap-1">
                         {isCurrentUserMessage && (

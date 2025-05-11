@@ -2,7 +2,7 @@
 import { BsArrowRight } from 'react-icons/bs';
 import { use } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState} from 'react';
 import SyncedVideoPlayer from '@/components/room/SyncedVideoPlayer';
 import VideoQueue from '@/components/room/VideoQueue';
 import VideoHistory from '@/components/room/VideoHistory';
@@ -27,6 +27,7 @@ import { fetchRoomData, deleteRoom, copyRoomLink, shareOnWhatsApp, shareOnTelegr
 import { updateUserMessages, checkIfUserIsBanned, renameUser } from '@/components/room/params/userManagement';
 import { UserRenameParams as ImportedUserRenameParams } from '@/components/room/params/types';
 import { FaWhatsapp, FaTelegram } from 'react-icons/fa';
+
 
 interface BanData {
   userId: string;
@@ -619,7 +620,7 @@ export default function RoomPage({
                       value={userName}
                       onChange={(e) => setUserName(e.target.value)}
                       placeholder="Choisissez un pseudo unique"
-                      className={`w-full ${darkMode ? 'bg-gray-600 text-white placeholder-gray-400' : 'bg-white text-gray-900'}`}
+                      className={`w-full ${darkMode ? 'bg-white-600 text-white placeholder-gray-400' : 'bg-white text-gray-900'}`}
                     />
                     <Button 
                       onPress={() => handleRenameUser(currentUser.name, userName)}
