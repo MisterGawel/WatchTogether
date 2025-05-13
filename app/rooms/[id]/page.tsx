@@ -27,6 +27,7 @@ import { fetchRoomData, deleteRoom, copyRoomLink, shareOnWhatsApp, shareOnTelegr
 import { updateUserMessages, checkIfUserIsBanned, renameUser } from '@/components/room/params/userManagement';
 import { UserRenameParams as ImportedUserRenameParams } from '@/components/room/params/types';
 import { FaWhatsapp, FaTelegram } from 'react-icons/fa';
+import { FiSettings } from 'react-icons/fi';
 
 
 interface BanData {
@@ -48,7 +49,7 @@ export default function RoomPage({
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const router = useRouter();
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [roomName, setRoomName] = useState<string>('');
   const [adminName, setAdminName] = useState<string>('');
   const [loadingNames, setLoadingNames] = useState(false);
@@ -206,7 +207,7 @@ export default function RoomPage({
     return () => unsub();
   }, [roomId, router, communityId]);
 
-  // Vérification si l'utilisateur est admin de la salle
+  // Vérification si l'utilisateur est admin de la salle//
   useEffect(() => {
     if (!currentUser || !roomId) return;
 
@@ -391,17 +392,10 @@ export default function RoomPage({
             </span>
 
             
-            {/* Bouton Paramètres dans Card */}
-            <Card className={`w-auto shadow-none ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-full`}>
-            <CardHeader className="relative flex items-center justify-start px-0 pt-0 pb-2">
-                <Button
-                onClick={() => setShowModal(true)}
-                className={`px-4 py-2 text-white transition rounded-full ${darkMode ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-500 hover:bg-purple-600'}`}
-                >
-                Paramètres
-                </Button>
-            </CardHeader>
-            </Card>
+            {/* Bouton Paramètres */}
+            <button onClick={() => setShowModal(true)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+              <FiSettings size={24} />
+            </button>
 
 
             {/* Bouton Quitter la salle dans Card */}
