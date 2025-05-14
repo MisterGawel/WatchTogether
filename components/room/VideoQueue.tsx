@@ -51,10 +51,9 @@ export default function VideoQueue({ roomId, currentUserId, isAdmin }: Props) {
 	const handleRemove = async (video: VideoItem) => {
 		await deleteDoc(doc(db, `rooms/${roomId}/wait_links/${video.id}`));
 	};
-	  
 
 	return (
-		<div className="px-4 pb-4 space-y-4 grow">
+		<div className="px-4 pb-4 space-y-4 overflow-x-auto grow">
 			{queue.length === 0 ? (
 				<p className="mt-8 text-center text-gray-500">
 					Aucune vidéo en attente.
@@ -63,7 +62,7 @@ export default function VideoQueue({ roomId, currentUserId, isAdmin }: Props) {
 				queue.map((video) => (
 					<div
 						key={video.id}
-						className="flex items-center gap-4 transition-shadow rounded-lg"
+						className="flex items-center w-3/4 gap-4 overflow-x-auto transition-shadow rounded-lg"
 					>
 						{/* Thumbnail si dispo */}
 						{video.thumbnail ? (
@@ -92,17 +91,22 @@ export default function VideoQueue({ roomId, currentUserId, isAdmin }: Props) {
 						{isAdmin && (
 							<div className="flex gap-2 ml-auto">
 								<Button
-								size="sm"
-								color="primary"
-								onPress={() => handleForcePlay(video)}
-								className="hover:shadow-none"
+									size="sm"
+									color="primary"
+									onPress={() => handleForcePlay(video)}
+									className="hover:shadow-none"
 								>
-								Lire
+									Lire
 								</Button>
-								<Button size="sm" color="danger" onClick={() => handleRemove(video)}>🗑️</Button>
+								<Button
+									size="sm"
+									color="danger"
+									onClick={() => handleRemove(video)}
+								>
+									🗑️
+								</Button>
 							</div>
-							)}
-
+						)}
 					</div>
 				))
 			)}

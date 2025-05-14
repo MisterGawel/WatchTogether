@@ -6,6 +6,7 @@ import { auth, db } from '@/app/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ValidationError } from 'next/dist/compiled/amphtml-validator';
 import { doc, setDoc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 
 interface FormData {
 	name: string;
@@ -21,6 +22,7 @@ export default function RegisterPage() {
 		password: '',
 		confirmPassword: '',
 	});
+	const router = useRouter();
 	const [errorMessage, setErrorMessage] =
 		React.useState<ValidationError | null>(null);
 
@@ -44,6 +46,8 @@ export default function RegisterPage() {
 				communities: {},
 				rooms: [],
 			});
+
+			router.push('/');
 		} catch (error) {
 			console.error(error);
 		}
